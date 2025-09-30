@@ -1,3 +1,15 @@
+:root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    background-color: #ebb2b2;
+    line-height: 1.5;
+    font-weight: 400;
+  
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 .home {
     background-color: #ebb2b2;
     display: flex;
@@ -18,6 +30,9 @@
     justify-content: flex-start;
     position: relative;
     width: 100%;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
 }
 
 .home .header {
@@ -26,7 +41,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0px 24px;
-    height: 99px;
+    height: 100px;
     justify-content: space-between;
     padding: 0px 0px 0px 32px;
     position: relative;
@@ -39,12 +54,10 @@
     background-size: cover;
     display: flex;
     flex-direction: column;
-    height: 98px;
+    height: 100%;
     justify-content: center;
-    margin-bottom: -31.50px;
-    margin-top: -31.50px;
     position: relative;
-    width: 98px;
+    width: 100px;
 }
 
 .home .logo-saclay-meet {
@@ -61,10 +74,11 @@
     background-color: #ebb3b3;
     display: flex;
     gap: 10px;
-    height: 98px;
+    height: 200px;
     justify-content: center;
     position: relative;
-    width: 1440px;
+    text-align: center;
+    width: 100%;
 }
 
 .home .subtitle {
@@ -87,6 +101,7 @@
     align-items: center;
     background-color: #ebb2b2;
     display: flex;
+    flex-flow: row wrap;
     flex: 1;
     flex-grow: 1;
     gap: 48px;
@@ -94,7 +109,7 @@
     justify-content: space-around;
     position: relative;
     padding: 64px;
-    width: 1440px;
+    width: 90%;
 }
 
 .home .desc {
@@ -129,6 +144,8 @@
     background-size: cover;
     flex: 1;
     flex-grow: 1;
+    min-height: 340px;
+    min-width: 840px;
     position: relative;
 }
 
@@ -139,6 +156,8 @@
     background-size: cover;
     flex: 1;
     flex-grow: 1;
+    min-height: 340px;
+    min-width: 840px;
     position: relative;
 }
 
@@ -187,18 +206,19 @@
     font-family: "Roboto-Bold", Helvetica;
     font-size: 64px;
     font-weight: 700;
-    line-height: 64px;
+    line-height: 120%;
     position: relative;
 }
 
 .text-title .image-subtitle {
     color: #000000;
     font-family: "Roboto-Medium", Helvetica;
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 500;
     line-height: 24px;
     position: relative;
 }
+
 
 
 
