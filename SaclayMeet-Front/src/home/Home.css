@@ -126,20 +126,9 @@
     width: 500px;
 }
 
-.home .image-1 {
-    align-self: stretch;
-    background-image: url(./assets/image1.jpg);
-    background-position: 50% 50%;
-    background-size: cover;
-    flex: 1;
-    flex-grow: 1;
-    position: relative;
-    width: 100%
-}
-
 .home .image-2 {
     align-self: stretch;
-    background-image: url(./assets/image2.jpg);
+    background-image: url(../assets/image2.jpg);
     background-position: 50% 50%;
     background-size: cover;
     flex: 1;
@@ -151,7 +140,7 @@
 
 .home .image-3 {
     align-self: stretch;
-    background-image: url(./assets/image3.jpg);
+    background-image: url(../assets/image3.jpg);
     background-position: 50% 50%;
     background-size: cover;
     flex: 1;
@@ -163,7 +152,7 @@
 
 .title {
     align-items: flex-start;
-    background-image: url(./assets/image1.jpg);
+    background-image: url(../assets/image1.jpg);
     background-position: 50% 50%;
     background-size: cover;
     display: inline-flex;

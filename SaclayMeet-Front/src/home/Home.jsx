@@ -1,8 +1,9 @@
-import logoSaclayMeet1 from "./assets/Logo_Saclay-meet.png";
+import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import "./Home.css";
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useNavigate } from "react-router-dom";
 
 let theme = createTheme({
   // Theme customization goes here as usual, including tonalOffset and/or
@@ -21,8 +22,8 @@ theme = createTheme(theme, {
   },
 });
 
-
 const Home = () => {
+    const navigate = useNavigate();
     return (
         <ThemeProvider theme={theme}>
             <div className="home">
@@ -35,8 +36,8 @@ const Home = () => {
                         />
                     </div>
                     <Stack spacing={2} direction="row">
-                        <Button color="salmon" variant="contained">Sign in</Button>
-                        <Button color="salmon" variant="contained">Register</Button>
+                        <Button color="salmon" variant="contained" onClick={() => navigate("/signIn")}>Sign in</Button>
+                        <Button color="salmon" variant="contained" onClick={() => navigate("/register")}>Register</Button>
                     </Stack>
                 </div>
                 
@@ -48,8 +49,6 @@ const Home = () => {
                                 <div className="image-title">SaclayMeet</div>
                                 <div className="image-subtitle">Pour une vie étudiante épanouie sur le plateau de Saclay</div>
                             </div>
-
-                            <div className="image-1" />
                         </div>
                     </div>
 
