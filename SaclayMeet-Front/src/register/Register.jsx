@@ -66,7 +66,7 @@ const Register = () => {
                             // Double ! pour convertir en booléen puis inverser la valeur
                             error={!!errors.email}
                             // Si on a une erreur, on l'affiche, sinon on met un espace pour garder la hauteur
-                            helperText={errors.email ? errors.email : " "}
+                            helperText={errors.email}
                             placeholder="Value"
                         />
                         <TextField
@@ -77,7 +77,7 @@ const Register = () => {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             error={!!errors.password}
-                            helperText={errors.password ? errors.password : " "}
+                            helperText={errors.password}
                             placeholder="Value"
                         />
                         <TextField
@@ -88,7 +88,7 @@ const Register = () => {
                             value={confirmPassword}
                             onChange={e => setConfirmPassword(e.target.value)}
                             error={!!errors.confirmPassword}
-                            helperText={errors.confirmPassword ? errors.confirmPassword : " "}
+                            helperText={errors.confirmPassword}
                             placeholder="Value"
                         />
                         <Button

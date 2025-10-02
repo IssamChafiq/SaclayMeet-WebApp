@@ -67,7 +67,7 @@ const CreateProfile = () => {
                             value={firstName}
                             onChange={e => setFirstName(e.target.value)}
                             error={!!errors.firstName}
-                            helperText={errors.firstName ? errors.firstName : " "}
+                            helperText={errors.firstName}
                         />
                         
                         <TextField
@@ -78,7 +78,7 @@ const CreateProfile = () => {
                             value={lastName}
                             onChange={e => setLastName(e.target.value)}
                             error={!!errors.lastName}
-                            helperText={errors.lastName ? errors.lastName : " "}
+                            helperText={errors.lastName}
                         />
                         
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -87,6 +87,12 @@ const CreateProfile = () => {
                                 value={birthDate}
                                 // Composant spécialisé donc on récupère la nouvelle valeur directement et non pas à travers un évènement.
                                 onChange={(newValue) => setBirthDate(newValue)}
+                                slotProps={{
+                                    textField: {
+                                        error: !!errors.birthDate,
+                                        helperText: errors.birthDate,
+                                    }
+                                }}
                             />
                         </LocalizationProvider>
                         
@@ -98,7 +104,7 @@ const CreateProfile = () => {
                             value={schoolName}
                             onChange={e => setSchoolName(e.target.value)}
                             error={!!errors.schoolName}
-                            helperText={errors.schoolName ? errors.schoolName : " "}
+                            helperText={errors.schoolName}
                         />
                         
                         <TextField
@@ -109,7 +115,7 @@ const CreateProfile = () => {
                             value={level}
                             onChange={e => setLevel(e.target.value)}
                             error={!!errors.level}
-                            helperText={errors.level ? errors.level : " "}
+                            helperText={errors.level}
                         />
                         
                         <TextField

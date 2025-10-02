@@ -60,7 +60,7 @@ const SignIn = () => {
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             error={!!errors.email}
-                            helperText={errors.email ? errors.email : " "}
+                            helperText={errors.email}
                             placeholder="Value"
                         />
                         
@@ -72,7 +72,7 @@ const SignIn = () => {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             error={!!errors.password}
-                            helperText={errors.password ? errors.password : " "}
+                            helperText={errors.password}
                             placeholder="Value"
                         />
                         
