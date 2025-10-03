@@ -1,0 +1,38 @@
+﻿		Projet interspécialité ET4
+
+
+Objectif :
+	La vie étudiante sur le plateau de Paris-Saclay est riche et variée, portée par de nombreuses associations, universités et initiatives locales. Pourtant, les informations sur les activités disponibles sont dispersées entre différents sites web, réseaux sociaux et affichages physiques, ce qui rend difficile pour les étudiants d’avoir une vision claire et centralisée des événements autour d’eux. L’objectif de ce projet est de créer une plateforme unique qui permette aux étudiants de proposer et de découvrir et s’inscrire facilement à des activités dans leur zone. À travers cette solution, nous voulons renforcer la vie de campus, encourager les échanges entre étudiants des différentes écoles, et simplifier l’organisation d’événements.
+
+- Détailles de fonctionnalités
+- Priorités
+Périmètre projet : 
+
+Priorité 1 :
+- Création de profil(Nom, Prénom, Age, École, Niveau scolaire, bio, réseaux).
+
+- Possibilité de créer et publier des activités (titre, description, date, lieu, image/video).
+
+- Consultation d’une liste d’activités avec filtres (date, type, localisation).
+
+- Système d’inscription / participation aux activités avec confirmation par e-mail.
+
+Priorité 2 :
+- Interface administrateur pour la modération des contenus publiés.
+
+- Notifications par email (confirmation, rappels d’événements).
+
+Priorité 3 (optionnel) : 
+- Authentification via email universitaire pour garantir un accès réservé aux étudiants.
+
+- Scraping automatique de sources externes pour enrichir la plateforme, prévu comme évolution future.
+
+Pages :
+onglet1 : page de présentation de la webapp, avec logo, image, couleurs, nom de l’appli, bouton sign up ou log in.
+Onglet2 : clique sur bouton sign up :création compte(à developper)
+Onglet3 : Clique sur bouton log in : page connection
+Onglet 4: Après connexion ou création de compte, arrivé sur la page principal, avec 3 boutons ( profil, view activities, create activity)
+Onglet 5 : Profil button → Page de profil avec informations perso, et boutons activités crées et activité à venir.
+Onglet 6 : view activity button : ouvre la page des activités , avec au dessus le filtre et après une liste sous forme de rectangles qu’on peut defiler de haut en bas, avec une miniature de l’image données ou non, titre, lieu ,date (calendrier),
+Onglet 7 : create activity button : ouvre une page de création d’activité, où on peut ajouter un titre, un lieu, une date(calendrier),plage horaire, une description et un thème.
+
