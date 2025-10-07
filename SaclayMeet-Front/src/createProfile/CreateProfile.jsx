@@ -32,7 +32,7 @@ const CreateProfile = () => {
     const [bio, setBio] = useState("");
     const [errors, setErrors] = useState({firstName: "", lastName: "", birthDate: null, schoolName: "", level: ""});
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const newErrors = {
             firstName: firstName.trim() === "" ? "Veuillez rentrer un prénom" : "",
             lastName: lastName.trim() === "" ? "Veuillez rentrer un nom de famille" : "",
@@ -41,8 +41,30 @@ const CreateProfile = () => {
             level: level.trim() === "" ? "Veuillez rentrer votre niveau d'étude" : "",
         };
         setErrors(newErrors);
+
+        const userId = localStorage.getItem("userId");
+
+        const profileData = {
+          firstName: firstName,
+          lastName: lastName,
+          birthDate: birthDate ? birthDate.format("YYYY-MM-DD") : null,
+          schoolName: schoolName,
+          level: level,
+          bio: bio,
+        };
+
+        const response = await fetch(`http://localhost:8080/api/users/update/${userId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(profileData),
+        });
+
         if (!newErrors.firstName && !newErrors.lastName && !newErrors.birthDate && !newErrors.schoolName && !newErrors.level) {
-            navigate("/viewActivities");
+            if (response.ok) {
+              navigate("/viewActivities");
+            }
         }
     };
 
