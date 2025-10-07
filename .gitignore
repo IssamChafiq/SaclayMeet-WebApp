@@ -1,0 +1,24 @@
+# Logs
+SaclayMeet-Front/logs
+SaclayMeet-Front/*.log
+SaclayMeet-Front/npm-debug.log*
+SaclayMeet-Front/yarn-debug.log*
+SaclayMeet-Front/yarn-error.log*
+SaclayMeet-Front/pnpm-debug.log*
+SaclayMeet-Front/lerna-debug.log*
+
+SaclayMeet-Front/node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
