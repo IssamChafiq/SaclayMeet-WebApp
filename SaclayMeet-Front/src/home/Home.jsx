@@ -5,13 +5,9 @@ import Button from '@mui/material/Button';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
 
-let theme = createTheme({
-  // Theme customization goes here as usual, including tonalOffset and/or
-  // contrastThreshold as the augmentColor() function relies on these
-});
+let theme = createTheme({});
 
 theme = createTheme(theme, {
-  // Custom colors created with augmentColor go here
   palette: {
     salmon: theme.palette.augmentColor({
       color: {
@@ -27,6 +23,7 @@ const Home = () => {
     return (
         <ThemeProvider theme={theme}>
             <div className="home">
+                {/*Header, logos + boutons*/}
                 <div className="header">
                     <div className="image">
                         <img
@@ -41,8 +38,8 @@ const Home = () => {
                     </Stack>
                 </div>
                 
-                
                 <div className="body">
+                    {/*Image principale et titre*/}
                     <div className="title">
                         <div className="hero-image">
                             <div className="text-title">
@@ -52,12 +49,14 @@ const Home = () => {
                         </div>
                     </div>
 
+                    {/*Description*/}
                     <div className="description">
                         <p className="subtitle">
                             Organiser des évènements n’a jamais été aussi facile !
                         </p>
                     </div>
 
+                    {/*Images et descriptions*/}
                     <div className="images">
                             <p className="desc">
                                 Proposez des rencontres aux autres utilisateurs...
