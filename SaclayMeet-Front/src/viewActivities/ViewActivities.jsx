@@ -1,5 +1,7 @@
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import "./ViewActivities.css";
+import ActivityCard from "../components/ActivityCard";
+
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
@@ -7,6 +9,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 let theme = createTheme({});
 
@@ -41,12 +46,6 @@ const ViewActivities = () => {
             description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
             tags: ["Tag", "Tag", "Tag"]
         },
-        {
-            id: 4,
-            title: "Title",
-            description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
-            tags: ["Tag", "Tag", "Tag"]
-        }
     ];
 
     return (
@@ -122,51 +121,33 @@ const ViewActivities = () => {
 
                             <div className="date-filter">
                                 <p className="date-label">After</p>
-                                <TextField 
-                                    select 
-                                    defaultValue="Date picker"
-                                    size="small"
-                                    fullWidth
-                                    SelectProps={{
-                                        native: true,
-                                    }}
-                                >
-                                    <option value="Date picker">Date picker</option>
-                                </TextField>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker 
+                                        label="Start date"
+                                    />
+                                </LocalizationProvider>
                             </div>
 
                             <div className="date-filter">
                                 <p className="date-label">Before</p>
-                                <TextField 
-                                    select 
-                                    defaultValue="Date picker"
-                                    size="small"
-                                    fullWidth
-                                    SelectProps={{
-                                        native: true,
-                                    }}
-                                >
-                                    <option value="Date picker">Date picker</option>
-                                </TextField>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker 
+                                        label="End date"
+                                    />
+                                </LocalizationProvider>
                             </div>
                         </div>
                     </div>
 
                     <div className="activities-list">
                         {activities.map((activity) => (
-                            <div key={activity.id} className="activity-card">
-                                <div className="activity-image"></div>
-                                <div className="activity-content">
-                                    <h2 className="activity-title">{activity.title}</h2>
-                                    <p className="activity-description">{activity.description}</p>
-                                    <div className="activity-tags">
-                                        {activity.tags.map((tag, index) => (
-                                            <span key={index} className="tag">{tag}</span>
-                                        ))}
-                                        <span className="tag-more">...</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <ActivityCard
+                                key={activity.id}
+                                title={activity.title}
+                                description={activity.description}
+                                tags={activity.tags}
+                                type="tag"
+                            />
                         ))}
                     </div>
                 </div>
