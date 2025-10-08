@@ -9,6 +9,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './CreateActivity.css';
+import placeholder from "../assets/placeholder.png";
 
 let theme = createTheme({});
 
@@ -59,7 +60,7 @@ const CreateActivity = () => {
         <div className="main-content">
           <div className="content-wrapper">
             {/* Image placeholder */}
-            <div className="image-placeholder"></div>
+            <img className="image-placeholder" src={placeholder}/>
 
             {/* Form */}
             <div className="form-container">
