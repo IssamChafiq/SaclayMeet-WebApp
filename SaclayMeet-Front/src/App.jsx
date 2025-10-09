@@ -6,11 +6,12 @@ import CreateProfile from "./createProfile/CreateProfile";
 import ViewActivities from "./viewActivities/ViewActivities";
 import CreateActivity from "./createActivity/CreateActivity";
 import UserProfile from "./userProfile/UserProfile";
+import ActivityDetails from "./activityDetails/ActivityDetails";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<UserProfile />} />
+      <Route path="/" element={<ActivityDetails />} />
       <Route path="/signIn" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
       <Route path="/createProfile" element={<CreateProfile />} />
