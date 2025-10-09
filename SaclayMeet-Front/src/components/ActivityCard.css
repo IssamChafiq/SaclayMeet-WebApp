@@ -63,3 +63,8 @@
     display: flex;
     align-items: center;
 }
+
+.unsubscribe-button {
+    display: flex;
+    align-items: center;
+}

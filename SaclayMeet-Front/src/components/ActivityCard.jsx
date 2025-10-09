@@ -32,13 +32,8 @@ const ActivityCard = ({
             )}
             {/* Affichage si on est abonné à l'activité, dans la fenêtre upcoming activities */}
             {type === "subscribed" && (
-                <div className="activity-tags">
-                    {tags.map((tag, index) => (
-                        <span key={index} className="tag">{tag}</span>
-                    ))}
-                    {tags.length > 3 && (
-                        <span className="tag-more">...</span>
-                    )}
+                <div className="unsubscribe-button">
+                    <Button color="error" variant="contained">Unsubscribe from activity</Button>
                 </div>
             )}
         </div>
