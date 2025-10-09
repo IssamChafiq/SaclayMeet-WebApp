@@ -9,11 +9,12 @@ import UserProfile from "./userProfile/UserProfile";
 import ActivityDetails from "./activityDetails/ActivityDetails";
 import ActivitiesCreated from "./activitiesCreated/ActivitiesCreated";
 import UpcomingActivities from "./upcomingActivities/UpcomingActivities";
+import ProfileView from "./profileView/ProfileView";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<UpcomingActivities />} />
+      <Route path="/" element={<ProfileView />} />
       <Route path="/signIn" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
       <Route path="/createProfile" element={<CreateProfile />} />
