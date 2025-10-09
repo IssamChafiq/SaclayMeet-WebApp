@@ -61,9 +61,9 @@ const ViewActivities = () => {
                     </div>
                     
                     <div className="nav-buttons">
-                        <Button color="inherit" className="nav-button">Profile</Button>
+                        <Button color="inherit">Profile</Button>
                         <Button color="salmon" variant="contained">View Activities</Button>
-                        <Button color="inherit" className="nav-button">Create Activity</Button>
+                        <Button color="inherit">Create Activity</Button>
                     </div>
                 </div>
 

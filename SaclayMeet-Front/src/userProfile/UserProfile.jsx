@@ -48,18 +48,18 @@ const UserProfile = () => {
           </div>
           
           <div className="nav-buttons">
-            <Button color="salmon" variant="contained" className="nav-button">Profile</Button>
-            <Button color="inherit" className="nav-button">View Activities</Button>
-            <Button color="inherit" className="nav-button">Create Activity</Button>
+            <Button color="salmon" variant="contained">Profile</Button>
+            <Button color="inherit">View Activities</Button>
+            <Button color="inherit">Create Activity</Button>
           </div>
         </div>
 
         <div className="profile-content">
           {/* Navigation sidebar */}
-          <div className="sidebar">
-            <Button color="salmon" variant="contained" className="sidebar-button">Profile</Button>
-            <Button color="inherit" className="sidebar-button">Activities created</Button>
-            <Button color="inherit" className="sidebar-button">Upcoming activities</Button>
+          <div className="profile-sidebar">
+            <Button color="salmon" variant="contained">Profile</Button>
+            <Button color="inherit">Activities created</Button>
+            <Button color="inherit">Upcoming activities</Button>
           </div>
 
           {/* Main content */}

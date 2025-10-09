@@ -7,11 +7,12 @@ import ViewActivities from "./viewActivities/ViewActivities";
 import CreateActivity from "./createActivity/CreateActivity";
 import UserProfile from "./userProfile/UserProfile";
 import ActivityDetails from "./activityDetails/ActivityDetails";
+import ActivitiesCreated from "./activitiesCreated/ActivitiesCreated";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<ActivityDetails />} />
+      <Route path="/" element={<ActivitiesCreated />} />
       <Route path="/signIn" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
       <Route path="/createProfile" element={<CreateProfile />} />

@@ -8,8 +8,8 @@
 }
 
 .activity-image {
-    width: 150px;
-    height: 150px;
+    max-width: 250px;
+    max-height: 250px;
     background-color: #d9d9d9;
     border-radius: 4px;
     flex-shrink: 0;
@@ -19,7 +19,6 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
 .activity-title {
@@ -58,4 +57,9 @@
     color: #000000;
     font-family: "Roboto-Bold", Helvetica;
     font-size: 16px;
+}
+
+.delete-button {
+    display: flex;
+    align-items: center;
 }
