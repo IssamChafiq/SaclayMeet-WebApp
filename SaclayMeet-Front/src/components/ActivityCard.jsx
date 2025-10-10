@@ -7,8 +7,10 @@ const ActivityCard = ({
     title = "Title", 
     description ="", 
     tags = [], 
-    type = "tag"}) => (
-    <div className="activity-card">
+    type = "tag",
+    onClick
+}) => (
+    <div className="activity-card" onClick={onClick} style={{ cursor: "pointer" }}>
         <img src={image} alt={title} className="activity-image" />
         <div className="activity-content">
             <h2 className="activity-title">{title}</h2>

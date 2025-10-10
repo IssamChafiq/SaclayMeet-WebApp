@@ -12,6 +12,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { useNavigate } from "react-router-dom";
 
 let theme = createTheme({});
 
@@ -27,6 +28,7 @@ theme = createTheme(theme, {
 });
 
 const ViewActivities = () => {
+    const navigate = useNavigate();
     const activities = [
         {
             id: 1,
@@ -145,6 +147,7 @@ const ViewActivities = () => {
                     </div>
 
                     <div className="activities-list">
+                        {/* Pour naviguer vers une activité en particulier : onClick={() => navigate(`/activity/${activity.id}`)} */}
                         {activities.map((activity) => (
                             <ActivityCard
                                 key={activity.id}
@@ -152,6 +155,7 @@ const ViewActivities = () => {
                                 description={activity.description}
                                 tags={activity.tags}
                                 type="tag"
+                                onClick={() => navigate("/activityDetails")}
                             />
                         ))}
                     </div>
