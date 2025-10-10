@@ -3,7 +3,6 @@ import "./ViewActivities.css";
 import ActivityCard from "../components/ActivityCard";
 import NavButtons from "../components/NavButtons";
 
-import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -96,15 +95,15 @@ const ViewActivities = () => {
                             <div className="filter-category">
                                 <p className="category-title">• Education</p>
                                 <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultChecked />} 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
                                     label="Label" 
                                 />
                                 <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultChecked />} 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
                                     label="Label" 
                                 />
                                 <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultChecked />} 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
                                     label="Label" 
                                 />
                             </div>
@@ -112,15 +111,15 @@ const ViewActivities = () => {
                             <div className="filter-category">
                                 <p className="category-title">• Entertainement</p>
                                 <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultChecked />} 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
                                     label="Label" 
                                 />
                                 <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultChecked />} 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
                                     label="Label" 
                                 />
                                 <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultChecked />} 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
                                     label="Label" 
                                 />
                             </div>
