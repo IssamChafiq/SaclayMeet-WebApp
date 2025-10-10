@@ -27,13 +27,6 @@
     object-fit: cover;
 }
 
-.nav-buttons {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    margin-top: -20px;
-}
-
 .profile-content {
     display: flex;
     gap: 24px;

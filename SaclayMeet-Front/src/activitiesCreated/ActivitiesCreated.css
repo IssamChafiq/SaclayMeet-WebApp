@@ -27,13 +27,6 @@
     object-fit: cover;
 }
 
-.nav-buttons {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    margin-top: -20px;
-}
-
 .search-container {
     display: flex;
     justify-content: center;
@@ -59,12 +52,7 @@
 }
 
 .sidebar {
-    width: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: -80px;
-    flex-shrink: 0;
+    margin-top: -82px;
 }
 
 .activities-list {

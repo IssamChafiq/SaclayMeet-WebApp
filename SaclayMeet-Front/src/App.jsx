@@ -14,11 +14,17 @@ import ProfileView from "./profileView/ProfileView";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<ProfileView />} />
+      <Route path="/" element={<UserProfile />} />
       <Route path="/signIn" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
       <Route path="/createProfile" element={<CreateProfile />} />
       <Route path="/viewActivities" element={<ViewActivities />} />
+      <Route path="/createActivity" element={<CreateActivity />} />
+      <Route path="/userProfile" element={<UserProfile />} />
+      <Route path="/activityDetails" element={<ActivityDetails />} /> {/*J'ai l'impression qu'en lui passant l'id de la route, on peut lui faire aller sur une route spécifique : <Route path="/activityDetails/:id" element={<ActivityDetails />} />*/}
+      <Route path="/activitiesCreated" element={<ActivitiesCreated />} />
+      <Route path="/upcomingActivities" element={<UpcomingActivities />} />
+      <Route path="/profileView" element={<ProfileView />} />
     </Routes>
   );
 }

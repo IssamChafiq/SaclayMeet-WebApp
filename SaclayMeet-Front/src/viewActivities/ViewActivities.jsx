@@ -1,6 +1,7 @@
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import "./ViewActivities.css";
 import ActivityCard from "../components/ActivityCard";
+import NavButtons from "../components/NavButtons";
 
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -60,11 +61,16 @@ const ViewActivities = () => {
                         />
                     </div>
                     
-                    <div className="nav-buttons">
-                        <Button color="inherit">Profile</Button>
-                        <Button color="salmon" variant="contained">View Activities</Button>
-                        <Button color="inherit">Create Activity</Button>
-                    </div>
+                    <NavButtons
+                        name1="Profile" 
+                        name2="View Activities" 
+                        name3="Create Activity" 
+                        path1="/userProfile" 
+                        path2="/viewActivities" 
+                        path3="/createActivity" 
+                        current="second"
+                        inline={true}
+                    />
                 </div>
 
                 <div className="search-container">

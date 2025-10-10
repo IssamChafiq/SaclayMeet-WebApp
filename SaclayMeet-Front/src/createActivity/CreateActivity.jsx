@@ -1,3 +1,8 @@
+import './CreateActivity.css';
+import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
+import placeholder from "../assets/placeholder.png";
+import NavButtons from "../components/NavButtons";
+
 import { useState } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -7,9 +12,6 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
-import './CreateActivity.css';
-import placeholder from "../assets/placeholder.png";
 
 let theme = createTheme({});
 
@@ -49,11 +51,16 @@ const CreateActivity = () => {
             />
           </div>
           
-          <div className="nav-buttons">
-            <Button color="inherit">Profile</Button>
-            <Button color="inherit">View Activities</Button>
-            <Button color="salmon" variant="contained">Create Activity</Button>
-          </div>
+          <NavButtons
+            name1="Profile" 
+            name2="View activities" 
+            name3="Create activity" 
+            path1="/userProfile" 
+            path2="/ViewActivities" 
+            path3="/createActivity" 
+            current="third"
+            inline={true}
+          />
         </div>
 
         {/* Content */}

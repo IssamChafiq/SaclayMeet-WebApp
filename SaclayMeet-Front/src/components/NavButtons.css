@@ -1,0 +1,20 @@
+.navigation-buttons {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.profile-buttons.inline {
+    display: flex;
+    gap: 10px;
+    margin-top: -20px;
+}
+
+.profile-buttons.block {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}

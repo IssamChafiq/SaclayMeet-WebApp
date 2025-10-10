@@ -5,6 +5,7 @@ import Avatar from '@mui/material/Avatar';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './UserProfile.css';
+import NavButtons from '../components/NavButtons';
 
 let theme = createTheme({});
 
@@ -47,20 +48,30 @@ const UserProfile = () => {
             />
           </div>
           
-          <div className="nav-buttons">
-            <Button color="salmon" variant="contained">Profile</Button>
-            <Button color="inherit">View Activities</Button>
-            <Button color="inherit">Create Activity</Button>
-          </div>
+          <NavButtons
+            name1="Profile" 
+            name2="View activities" 
+            name3="Create activity" 
+            path1="/userProfile" 
+            path2="/ViewActivities" 
+            path3="/createActivity" 
+            current="first"
+            inline={true}
+          />
         </div>
 
         <div className="profile-content">
           {/* Navigation sidebar */}
-          <div className="profile-sidebar">
-            <Button color="salmon" variant="contained">Profile</Button>
-            <Button color="inherit">Activities created</Button>
-            <Button color="inherit">Upcoming activities</Button>
-          </div>
+          <NavButtons
+            name1="Profile" 
+            name2="Activities created" 
+            name3="Upcoming activities" 
+            path1="/userProfile" 
+            path2="/activitiesCreated" 
+            path3="/upcomingActivities" 
+            current="first"
+            inline={false}
+          />
 
           {/* Main content */}
           <div className="profile-main">
