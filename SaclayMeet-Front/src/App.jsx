@@ -14,7 +14,7 @@ import ProfileView from "./profileView/ProfileView";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<UserProfile />} />
+      <Route path="/" element={<Home />} />
       <Route path="/signIn" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
       <Route path="/createProfile" element={<CreateProfile />} />

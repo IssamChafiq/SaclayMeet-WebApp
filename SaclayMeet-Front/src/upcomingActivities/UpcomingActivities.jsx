@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useNavigate } from "react-router-dom";
 
 let theme = createTheme({});
 
@@ -23,6 +24,7 @@ theme = createTheme(theme, {
 });
 
 const ViewActivities = () => {
+    const navigate = useNavigate();
     const activities = [
         {
             id: 1,
@@ -106,6 +108,7 @@ const ViewActivities = () => {
                                 description={activity.description}
                                 tags={activity.tags}
                                 type="subscribed"
+                                onClick={() => navigate("/activityDetails")}
                             />
                         ))}
                     </div>

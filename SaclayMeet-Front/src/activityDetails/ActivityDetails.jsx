@@ -4,6 +4,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ArrowLeft } from 'lucide-react';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './ActivityDetails.css';
+import { useNavigate } from "react-router-dom";
 
 let theme = createTheme({});
 
@@ -19,6 +20,7 @@ theme = createTheme(theme, {
 });
 
 const ActivityDetails = () => {
+  const navigate = useNavigate();
   const activity = {
     title: "Title",
     date: "Date",
@@ -45,6 +47,7 @@ const ActivityDetails = () => {
             className="back-button"
             startIcon={<ArrowLeft size={24}/>}
             color='inherit'
+            onClick={() => navigate(-1)} 
           >Back
           </Button>
         </div>
@@ -61,7 +64,7 @@ const ActivityDetails = () => {
                 <h1 className="activity-title">{activity.title}</h1>
                 <p className="activity-date">{activity.date}</p>
                 <p className="activity-place">{activity.place}</p>
-                <p className="activity-author">By {activity.author}</p>
+                <p className="activity-author" onClick={() => navigate("/userProfile")} style={{ cursor: "pointer" }}>By {activity.author}</p>
                 
                 <div className="activity-tags">
                   {activity.tags.map((tag, index) => (
