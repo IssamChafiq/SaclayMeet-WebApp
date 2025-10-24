@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';
@@ -20,20 +20,66 @@ theme = createTheme(theme, {
   },
 });
 
+// petite fonction utilitaire pour calculer l'âge à partir de birthDate ("YYYY-MM-DD")
+function getAgeFromBirthDate(birthDateStr) {
+  if (!birthDateStr) return "";
+  const today = new Date();
+  const [year, month, day] = birthDateStr.split("-").map(Number);
+  const birthDate = new Date(year, month - 1, day);
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return String(age);
+}
+
 const UserProfile = () => {
+  // state qui contiendra les vraies infos venant du back
   const [profileData, setProfileData] = useState({
-    firstName: 'TestMan',
-    lastName: 'McTest',
-    email: 'testtesttest@gmail.com',
-    age: '21',
-    school: 'Polytech Paris-Saclay',
-    level: 'M2',
-    bio: 'Nam pellentesque sollicitudin lorem, a malesuada velit suscipit vel. Sed faucibus lobortis nibh, quis sollicitudin justo vulputate et. Morbi dignissim, nisi sit amet posuere dictum, libero dui scelerisque ante, eleifend viverra sapien lorem quis odio. In dignissim nec ligula at congue. Fusce quis scelerisque augue. Aenean sollicitudin nibh vel placerat vulputate. Proin sed purus magna.',
-    facebook: '@TestMan',
-    snapchat: '@TestMan',
-    instagram: '@TestMan',
-    linkedin: '@TestMan'
+    firstName: "",
+    lastName: "",
+    email: "",
+    birthDate: "",
+    schoolName: "",
+    level: "",
+    bio: "",
+    // réseaux sociaux pas encore dans le back, donc on les garde vides
+    facebook: "",
+    snapchat: "",
+    instagram: "",
+    linkedin: ""
   });
+
+  // aller chercher l'utilisateur dans le back dès que la page charge
+  useEffect(() => {
+    // 1. récupérer l'id stocké après register / login
+    const userId = localStorage.getItem("userId");
+
+    // 2. appeler le backend pour récupérer les infos de cet utilisateur
+    //    correspond à GET /api/users/{id} dans ton UserController
+    fetch(`http://localhost:8080/api/users/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        // 3. stocker la réponse dans le state pour afficher dans l'UI
+        setProfileData({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          birthDate: data.birthDate || "",
+          schoolName: data.schoolName || "",
+          level: data.level || "",
+          bio: data.bio || "",
+          facebook: "empty for now",
+          snapchat: "empty for now",
+          instagram: "empty for now",
+          linkedin: "mepty for now"
+        });
+      });
+  }, []); // [] = ne le faire qu'une seule fois au chargement
+
+  const age = getAgeFromBirthDate(profileData.birthDate);
 
   return (
     <ThemeProvider theme={theme}>
@@ -79,11 +125,13 @@ const UserProfile = () => {
             <div className="profile-header">
               <Avatar
                 className="profile-avatar"
-                alt="TestMan McTest"
+                alt={`${profileData.firstName} ${profileData.lastName}`}
                 sx={{ width: 100, height: 100 }}
               />
-              <h1 className="profile-name">TestMan McTest</h1>
-              <p className="profile-email">testtesttest@gmail.com</p>
+              <h1 className="profile-name">
+                {profileData.firstName} {profileData.lastName}
+              </h1>
+              <p className="profile-email">{profileData.email}</p>
             </div>
 
             {/* Form fields */}
@@ -94,8 +142,10 @@ const UserProfile = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    defaultValue="TestMan"
+                    value={profileData.firstName}
                     className="input-field"
+                    onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                    // readOnly UI for now
                   />
                 </div>
                 <div className="form-field">
@@ -103,8 +153,9 @@ const UserProfile = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    defaultValue="McTest"
+                    value={profileData.lastName}
                     className="input-field"
+                    onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
                   />
                 </div>
               </div>
@@ -115,8 +166,9 @@ const UserProfile = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    defaultValue="testtesttest@gmail.com"
+                    value={profileData.email}
                     className="input-field"
+                    disabled={true}
                   />
                 </div>
                 <div className="form-field">
@@ -124,8 +176,9 @@ const UserProfile = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    defaultValue="21"
+                    value={age}
                     className="input-field"
+                    disabled={true}
                   />
                 </div>
               </div>
@@ -136,8 +189,9 @@ const UserProfile = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    defaultValue="Polytech Paris-Saclay"
+                    value={profileData.schoolName}
                     className="input-field"
+                    onChange={(e) => setProfileData({ ...profileData, schoolName: e.target.value })}
                   />
                 </div>
                 <div className="form-field">
@@ -145,8 +199,9 @@ const UserProfile = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    defaultValue="M2"
+                    value={profileData.level}
                     className="input-field"
+                    onChange={(e) => setProfileData({ ...profileData, level: e.target.value })}
                   />
                 </div>
               </div>
@@ -158,12 +213,13 @@ const UserProfile = () => {
                   multiline
                   rows={4}
                   variant="outlined"
-                  defaultValue="Nam pellentesque sollicitudin lorem, a malesuada velit suscipit vel. Sed faucibus lobortis nibh, quis sollicitudin justo vulputate et. Morbi dignissim, nisi sit amet posuere dictum, libero dui scelerisque ante, eleifend viverra sapien lorem quis odio. In dignissim nec ligula at congue. Fusce quis scelerisque augue. Aenean sollicitudin nibh vel placerat vulputate. Proin sed purus magna."
+                  value={profileData.bio}
                   className="input-field"
+                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
                 />
               </div>
 
-              {/* Social media links */}
+              {/* Social media links (pas encore dans le back, donc valeurs locales seulement) */}
               <div className="social-section">
                 <div className="social-row">
                   <div className="social-field">
@@ -175,7 +231,7 @@ const UserProfile = () => {
                     <TextField
                       fullWidth
                       variant="outlined"
-                      defaultValue="@TestMan"
+                      value={profileData.facebook}
                       className="input-field"
                     />
                   </div>
@@ -188,7 +244,7 @@ const UserProfile = () => {
                     <TextField
                       fullWidth
                       variant="outlined"
-                      defaultValue="@TestMan"
+                      value={profileData.instagram}
                       className="input-field"
                     />
                   </div>
@@ -204,7 +260,7 @@ const UserProfile = () => {
                     <TextField
                       fullWidth
                       variant="outlined"
-                      defaultValue="@TestMan"
+                      value={profileData.snapchat}
                       className="input-field"
                     />
                   </div>
@@ -217,13 +273,26 @@ const UserProfile = () => {
                     <TextField
                       fullWidth
                       variant="outlined"
-                      defaultValue="@TestMan"
+                      value={profileData.linkedin}
                       className="input-field"
                     />
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Example: you could later add an "Edit profile" button here 
+            <div style={{ marginTop: "2rem" }}>
+              <Button
+                color="salmon"
+                variant="contained"
+                size="large"
+                disabled
+              >
+                Edit (coming soon)
+              </Button>
+            </div>*/}
+
           </div>
         </div>
       </div>

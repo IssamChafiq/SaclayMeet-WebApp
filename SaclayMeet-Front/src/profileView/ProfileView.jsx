@@ -23,6 +23,7 @@ theme = createTheme(theme, {
 
 const UserProfile = () => {
   const navigate = useNavigate();
+  
   const [profileData, setProfileData] = useState({
     firstName: 'TestMan',
     lastName: 'McTest',
