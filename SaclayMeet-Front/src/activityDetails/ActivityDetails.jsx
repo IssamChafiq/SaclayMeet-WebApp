@@ -64,7 +64,7 @@ const ActivityDetails = () => {
                 <h1 className="activity-title">{activity.title}</h1>
                 <p className="activity-date">{activity.date}</p>
                 <p className="activity-place">{activity.place}</p>
-                <p className="activity-author" onClick={() => navigate("/userProfile")} style={{ cursor: "pointer" }}>By {activity.author}</p>
+                <p className="activity-author" onClick={() => navigate("/profileView")} style={{ cursor: "pointer" }}>By {activity.author}</p>
                 
                 <div className="activity-tags">
                   {activity.tags.map((tag, index) => (

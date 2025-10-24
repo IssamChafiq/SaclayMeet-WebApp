@@ -9,7 +9,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // même type que dans UserRepository
+    private Integer id;
 
     @Column(name = "first_name", length = 100)
     private String firstName;
@@ -35,12 +35,11 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    // ✅ Relation 1-to-1 avec Image
+    // Relation 1-to-1 avec Image
     @OneToOne
-    @JoinColumn(name = "image_id") // clé étrangère dans la table "users"
+    @JoinColumn(name = "image_id") // clé étrangère dans la table users
     private Image image;
 
-    // ===== Constructeurs =====
     public User() {}
 
     public User(String email, String password) {

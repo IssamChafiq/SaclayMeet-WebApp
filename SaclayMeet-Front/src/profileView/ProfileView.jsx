@@ -6,6 +6,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ArrowLeft } from 'lucide-react';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './ProfileView.css';
+import { useNavigate } from "react-router-dom";
 
 let theme = createTheme({});
 
@@ -21,6 +22,7 @@ theme = createTheme(theme, {
 });
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState({
     firstName: 'TestMan',
     lastName: 'McTest',
@@ -52,6 +54,7 @@ const UserProfile = () => {
             className="back-button"
             startIcon={<ArrowLeft size={24}/>}
             color='inherit'
+            onClick={() => navigate(-1)} 
           >Back
           </Button>
         </div>
