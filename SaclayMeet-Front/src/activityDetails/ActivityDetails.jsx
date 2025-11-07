@@ -94,6 +94,17 @@ const ActivityDetails = () => {
                 >
                   Subscribe to the activity
                 </Button>
+
+                <Button 
+                  variant="contained" 
+                  color="salmon"
+                  fullWidth
+                  className="chat-button"
+                  onClick={() => navigate("/groupChat")}
+                  style={{ marginTop: '12px' }}
+                >
+                  Join Group Chat
+                </Button>
               </div>
             </div>
           </div>
