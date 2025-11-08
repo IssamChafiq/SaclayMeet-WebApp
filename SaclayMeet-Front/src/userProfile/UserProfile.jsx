@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';
@@ -36,6 +37,7 @@ function getAgeFromBirthDate(birthDateStr) {
 }
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   // state qui contiendra les vraies infos venant du back
   const [profileData, setProfileData] = useState({
     firstName: "",
@@ -91,6 +93,7 @@ const UserProfile = () => {
               className="logo-saclay-meet"
               alt="Logo saclay meet"
               src={logoSaclayMeet1}
+              onClick={() => navigate("/viewActivities")}
             />
           </div>
           

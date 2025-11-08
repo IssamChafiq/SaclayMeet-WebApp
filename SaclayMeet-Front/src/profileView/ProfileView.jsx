@@ -48,6 +48,7 @@ const UserProfile = () => {
               className="logo-saclay-meet"
               alt="Logo saclay meet"
               src={logoSaclayMeet1}
+              onClick={() => navigate("/viewActivities")}
             />
           </div>
           

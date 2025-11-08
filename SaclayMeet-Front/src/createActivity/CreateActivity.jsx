@@ -3,6 +3,7 @@ import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import placeholder from "../assets/placeholder.png";
 import NavButtons from "../components/NavButtons";
 
+import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -27,6 +28,7 @@ theme = createTheme(theme, {
 });
 
 const CreateActivity = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: 'Tutoring help',
     place: 'Bat 620',
@@ -48,6 +50,7 @@ const CreateActivity = () => {
               className="logo-saclay-meet"
               alt="Logo saclay meet"
               src={logoSaclayMeet1}
+              onClick={() => navigate("/viewActivities")}
             />
           </div>
           

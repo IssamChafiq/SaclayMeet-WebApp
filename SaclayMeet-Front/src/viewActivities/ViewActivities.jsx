@@ -59,6 +59,7 @@ const ViewActivities = () => {
                             className="logo-saclay-meet"
                             alt="Logo saclay meet"
                             src={logoSaclayMeet1}
+                            onClick={() => navigate("/viewActivities")}
                         />
                     </div>
                     
@@ -89,7 +90,7 @@ const ViewActivities = () => {
                     />
                 </div>
 
-                <div className="content">
+                <div className="activities-content">
                     <div className="sidebar">
                         <div className="filters-box">
                             <h3 className="filters-title">Filters :</h3>
