@@ -7,6 +7,15 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './UserProfile.css';
 import NavButtons from '../components/NavButtons';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import { Facebook, Instagram, Linkedin } from 'lucide-react';
+import { Camera } from 'lucide-react'; // Pour Snapchat (pas d'icône officielle)
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+import 'dayjs/locale/fr'; // importer la locale française
 
 let theme = createTheme({});
 
@@ -52,18 +61,20 @@ const UserProfile = () => {
     linkedin: ""
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' // 'success' | 'error' | 'warning' | 'info', success par défaut
+  });
 
   // aller chercher l'utilisateur dans le back dès que la page charge
   useEffect(() => {
-    // 1. récupérer l'id stocké après register / login
     const userId = localStorage.getItem("userId");
 
-    // 2. appeler le backend pour récupérer les infos de cet utilisateur
-    //    correspond à GET /api/users/{id} dans ton UserController
     fetch(`http://localhost:8080/api/users/${userId}`)
       .then(res => res.json())
       .then(data => {
-        // 3. stocker la réponse dans le state pour afficher dans l'UI
+        // stocker la réponse dans le state pour afficher dans l'UI
         setProfileData({
           firstName: data.firstName || "",
           lastName: data.lastName || "",
@@ -80,25 +91,38 @@ const UserProfile = () => {
       });
   }, []); // [] = ne le faire qu'une seule fois au chargement
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     const userId = localStorage.getItem("userId");
-    // envoyer les modifications au backend (PUT /api/users/{id})
-    fetch(`http://localhost:8080/api/users/${userId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profileData)
-    })
-      .then(res => res.json())
-      .then(data => {
-        setIsEditing(false);
-        alert('Profile updated successfully!');
-      })
-      .catch(err => {
-        console.error('Error updating profile:', err);
-        alert('Failed to update profile');
+    
+    try {
+      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData)
       });
+      
+      if (!response.ok) throw new Error('Server error');
+      
+      const data = await response.json();
+      localStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
+      setIsEditing(false);
+      setSnackbar({
+        open: true,
+        message: 'Profile updated successfully!',
+        severity: 'success'
+      });
+    } catch (err) {
+      console.error('Error:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to update profile',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   const handleDisconnect = () => {
@@ -175,7 +199,7 @@ const UserProfile = () => {
                     value={profileData.firstName}
                     className="input-field"
                     onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
-                    // readOnly UI for now
+                    disabled={!isEditing}
                   />
                 </div>
                 <div className="form-field">
@@ -186,6 +210,7 @@ const UserProfile = () => {
                     value={profileData.lastName}
                     className="input-field"
                     onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                    disabled={!isEditing}
                   />
                 </div>
               </div>
@@ -198,18 +223,42 @@ const UserProfile = () => {
                     variant="outlined"
                     value={profileData.email}
                     className="input-field"
-                    disabled={false}
+                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                    disabled={!isEditing}
                   />
                 </div>
                 <div className="form-field">
-                  <label className="field-label">Age</label>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    value={age}
-                    className="input-field"
-                    disabled={false}
-                  />
+                  <label className="field-label">
+                    {isEditing ? 'Birth Date' : 'Age'}
+                  </label>
+                  {isEditing ? (
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
+                      <DatePicker
+                        value={profileData.birthDate ? dayjs(profileData.birthDate) : null}
+                        onChange={(newValue) => {
+                          setProfileData({
+                            ...profileData,
+                            birthDate: newValue ? newValue.format('YYYY-MM-DD') : ''
+                          });
+                        }}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            variant: 'outlined',
+                            className: 'input-field'
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
+                  ) : (
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      value={age}
+                      className="input-field"
+                      disabled={!isEditing}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -222,6 +271,7 @@ const UserProfile = () => {
                     value={profileData.schoolName}
                     className="input-field"
                     onChange={(e) => setProfileData({ ...profileData, schoolName: e.target.value })}
+                    disabled={!isEditing}
                   />
                 </div>
                 <div className="form-field">
@@ -232,6 +282,7 @@ const UserProfile = () => {
                     value={profileData.level}
                     className="input-field"
                     onChange={(e) => setProfileData({ ...profileData, level: e.target.value })}
+                    disabled={!isEditing}
                   />
                 </div>
               </div>
@@ -246,65 +297,58 @@ const UserProfile = () => {
                   value={profileData.bio}
                   className="input-field"
                   onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                  disabled={!isEditing}
                 />
               </div>
 
-              {/* Social media links (pas encore dans le back, donc valeurs locales seulement) */}
+              {/* Social media links */}
               <div className="social-section">
                 <div className="social-row">
                   <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" 
-                      alt="Facebook"
-                      className="social-icon"
-                    />
+                    <Facebook size={24} className="social-icon" color="#1877F2" />
                     <TextField
                       fullWidth
                       variant="outlined"
                       value={profileData.facebook}
                       className="input-field"
+                      onChange={(e) => setProfileData({ ...profileData, facebook: e.target.value })}
+                      disabled={!isEditing}
                     />
                   </div>
                   <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" 
-                      alt="Instagram"
-                      className="social-icon"
-                    />
+                    <Instagram size={24} className="social-icon" color="#E4405F" />
                     <TextField
                       fullWidth
                       variant="outlined"
                       value={profileData.instagram}
                       className="input-field"
+                      onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
+                      disabled={!isEditing}
                     />
                   </div>
                 </div>
 
                 <div className="social-row">
                   <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/en/c/c4/Snapchat_logo.svg" 
-                      alt="Snapchat"
-                      className="social-icon"
-                    />
+                    <Camera size={24} className="social-icon" color="#FFFC00" />
                     <TextField
                       fullWidth
                       variant="outlined"
                       value={profileData.snapchat}
                       className="input-field"
+                      onChange={(e) => setProfileData({ ...profileData, snapchat: e.target.value })}
+                      disabled={!isEditing}
                     />
                   </div>
                   <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" 
-                      alt="LinkedIn"
-                      className="social-icon"
-                    />
+                    <Linkedin size={24} className="social-icon" color="#0A66C2" />
                     <TextField
                       fullWidth
                       variant="outlined"
                       value={profileData.linkedin}
                       className="input-field"
+                      onChange={(e) => setProfileData({ ...profileData, linkedin: e.target.value })}
+                      disabled={!isEditing}
                     />
                   </div>
                 </div>
@@ -356,6 +400,22 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Snackbar pour les notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 };

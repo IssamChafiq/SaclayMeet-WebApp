@@ -21,6 +21,21 @@ theme = createTheme(theme, {
   },
 });
 
+// petite fonction utilitaire pour calculer l'âge à partir de birthDate ("YYYY-MM-DD")
+function getAgeFromBirthDate(birthDateStr) {
+  if (!birthDateStr) return "";
+  const today = new Date();
+  const [year, month, day] = birthDateStr.split("-").map(Number);
+  const birthDate = new Date(year, month - 1, day);
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return String(age);
+}
+
 const UserProfile = () => {
   const navigate = useNavigate();
   

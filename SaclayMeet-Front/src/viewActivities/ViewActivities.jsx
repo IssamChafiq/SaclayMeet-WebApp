@@ -129,7 +129,7 @@ const ViewActivities = () => {
 
                             <div className="date-filter">
                                 <p className="date-label">After</p>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
                                     <DatePicker 
                                         label="Start date"
                                     />
@@ -138,7 +138,7 @@ const ViewActivities = () => {
 
                             <div className="date-filter">
                                 <p className="date-label">Before</p>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
                                     <DatePicker 
                                         label="End date"
                                     />
@@ -155,7 +155,6 @@ const ViewActivities = () => {
                                 title={activity.title}
                                 description={activity.description}
                                 tags={activity.tags}
-                                type="tag"
                                 onClick={() => navigate("/activityDetails")}
                             />
                         ))}

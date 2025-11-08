@@ -63,10 +63,11 @@ const SignIn = () => {
         if (response.ok) {
           const data = await response.json();
 
-          // Connexion réussie : on sauvegarde l'ID utilisateur
+          // Connexion réussie : on sauvegarde l'ID utilisateur et son nom d'utilisateur (prenom + nom).
           localStorage.setItem("userId", data.id);
-
-          // Et on redirige vers la page principale
+          localStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
+          
+          // Rediriger vers la page d'activités
           navigate("/viewActivities");
         } else if (response.status === 401) {
           // Mauvais email ou mot de passe

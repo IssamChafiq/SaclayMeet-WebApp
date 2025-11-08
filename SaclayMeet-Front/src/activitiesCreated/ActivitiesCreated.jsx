@@ -102,13 +102,11 @@ const ViewActivities = () => {
 
                     <div className="activities-list">
                         {activities.map((activity) => (
-                            // We need a specific activityDetails page for people who created them, this one is for viewers
                             <ActivityCard
                                 key={activity.id}
                                 title={activity.title}
                                 description={activity.description}
                                 tags={activity.tags}
-                                type="owned"
                                 onClick={() => navigate("/activityDetails")} 
                             />
                         ))}

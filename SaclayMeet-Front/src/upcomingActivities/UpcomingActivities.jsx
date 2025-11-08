@@ -108,7 +108,6 @@ const ViewActivities = () => {
                                 title={activity.title}
                                 description={activity.description}
                                 tags={activity.tags}
-                                type="subscribed"
                                 onClick={() => navigate("/activityDetails")}
                             />
                         ))}
