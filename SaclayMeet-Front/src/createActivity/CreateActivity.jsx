@@ -10,6 +10,8 @@ import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -39,6 +41,72 @@ const CreateActivity = () => {
     educationTags: [true, true, true],
     entertainmentTags: [true, true, true]
   });
+  const [imagePreview, setImagePreview] = useState(placeholder);
+  const [imageFile, setImageFile] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImageFile(file);
+      // Créer une URL de prévisualisation
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCreateActivity = async () => {
+    const formDataToSend = new FormData();
+    
+    // Ajouter les données du formulaire
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('place', formData.place);
+    formDataToSend.append('date', formData.date);
+    formDataToSend.append('startTime', formData.startTime);
+    formDataToSend.append('endTime', formData.endTime);
+    formDataToSend.append('description', formData.description);
+    
+    // Ajouter l'image si elle existe
+    if (imageFile) {
+      formDataToSend.append('image', imageFile);
+    }
+    
+    try {
+      const response = await fetch('http://localhost:8080/api/activities', {
+        method: 'POST',
+        body: formDataToSend
+      });
+      
+      if (!response.ok) throw new Error('Failed to create activity');
+      
+      setSnackbar({
+        open: true,
+        message: 'Activity created successfully!',
+        severity: 'success'
+      });
+      
+      // Rediriger après 1.5 secondes pour laisser le temps de voir le message
+      setTimeout(() => navigate('/viewActivities'), 1500);
+    } catch (error) {
+      console.error('Error creating activity:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to create activity',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -69,8 +137,27 @@ const CreateActivity = () => {
         {/* Content */}
         <div className="main-content">
           <div className="content-wrapper">
-            {/* Image placeholder */}
-            <img className="image-placeholder" src={placeholder}/>
+            {/* Image upload */}
+            <div className="image-upload-container">
+              <img className="image-placeholder" src={imagePreview} alt="Activity preview"/>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="image-upload-input"
+                type="file"
+                onChange={handleImageUpload}
+              />
+              <label htmlFor="image-upload-input">
+                <Button
+                  variant="contained"
+                  color="salmon"
+                  component="span"
+                  className="upload-button"
+                >
+                  Upload Image
+                </Button>
+              </label>
+            </div>
 
             {/* Form */}
             <div className="form-container">
@@ -134,36 +221,35 @@ const CreateActivity = () => {
             <div className="tags-container">
               <h2 className="tags-title">Tags :</h2>
               
-              <div className="tag-category">
-                <p className="category-title">• Education</p>
-                <FormControlLabel 
-                  control={<Checkbox color="salmon" defaultUnchecked />} 
-                  label="Label" 
-                />
-                <FormControlLabel 
-                  control={<Checkbox color="salmon" defaultUnchecked />} 
-                  label="Label" 
-                />
-                <FormControlLabel 
-                  control={<Checkbox color="salmon" defaultUnchecked />} 
-                  label="Label" 
-                />
-              </div>
-
-              <div className="tag-category">
-                <p className="category-title">• Entertainement</p>
-                <FormControlLabel 
-                  control={<Checkbox color="salmon" defaultUnchecked />} 
-                  label="Label" 
-                />
-                <FormControlLabel 
-                  control={<Checkbox color="salmon" defaultUnchecked />} 
-                  label="Label" 
-                />
-                <FormControlLabel 
-                  control={<Checkbox color="salmon" defaultUnchecked />} 
-                  label="Label" 
-                />
+              <div className="filter-category">
+                  <FormControlLabel 
+                      control={<Checkbox color="salmon" defaultUnchecked />} 
+                      label="Study" 
+                  />
+                  <FormControlLabel 
+                      control={<Checkbox color="salmon" defaultUnchecked />} 
+                      label="Party" 
+                  />
+                  <FormControlLabel 
+                      control={<Checkbox color="salmon" defaultUnchecked />} 
+                      label="Outing" 
+                  />
+                  <FormControlLabel 
+                      control={<Checkbox color="salmon" defaultUnchecked />} 
+                      label="Movie" 
+                  />
+                  <FormControlLabel 
+                      control={<Checkbox color="salmon" defaultUnchecked />} 
+                      label="Games" 
+                  />
+                  <FormControlLabel 
+                      control={<Checkbox color="salmon" defaultUnchecked />} 
+                      label="Sport" 
+                  />
+                  <FormControlLabel 
+                      control={<Checkbox color="salmon" defaultUnchecked />} 
+                      label="Cultural" 
+                  />
               </div>
             </div>
           </div>
@@ -175,11 +261,28 @@ const CreateActivity = () => {
             variant="contained" 
             color="salmon"
             className="create-button"
+            onClick={handleCreateActivity}
           >
             Create activity
           </Button>
         </div>
       </div>
+
+      {/* Snackbar pour les notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 };
