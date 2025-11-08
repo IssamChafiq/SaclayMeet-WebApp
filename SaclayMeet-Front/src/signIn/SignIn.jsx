@@ -135,6 +135,17 @@ const SignIn = () => {
             >
               Sign in
             </Button>
+
+            {/* Lien vers Register */}
+            <p className="signup-prompt">
+              Don't have an account?{' '}
+              <span
+                className="register-link"
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </span>
+            </p>
           </div>
         </div>
       </div>

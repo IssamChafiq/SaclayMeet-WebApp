@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import Button from '@mui/material/Button';
+import { Send } from 'lucide-react';
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ArrowLeft, Send } from 'lucide-react';
+import BackButton from '../components/BackButton';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './GroupChat.css';
 import { useNavigate } from "react-router-dom";
@@ -100,14 +100,7 @@ const GroupChat = () => {
             />
           </div>
           
-          <Button 
-            className="back-button"
-            startIcon={<ArrowLeft size={24}/>}
-            color='inherit'
-            onClick={() => navigate(-1)} 
-          >
-            Back
-          </Button>
+          <BackButton />
         </div>
 
         {/* Chat Container */}

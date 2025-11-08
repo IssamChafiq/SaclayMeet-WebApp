@@ -38,7 +38,6 @@ function getAgeFromBirthDate(birthDateStr) {
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  // state qui contiendra les vraies infos venant du back
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -47,12 +46,12 @@ const UserProfile = () => {
     schoolName: "",
     level: "",
     bio: "",
-    // réseaux sociaux pas encore dans le back, donc on les garde vides
     facebook: "",
     snapchat: "",
     instagram: "",
     linkedin: ""
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   // aller chercher l'utilisateur dans le back dès que la page charge
   useEffect(() => {
@@ -76,10 +75,38 @@ const UserProfile = () => {
           facebook: "empty for now",
           snapchat: "empty for now",
           instagram: "empty for now",
-          linkedin: "mepty for now"
+          linkedin: "empty for now"
         });
       });
   }, []); // [] = ne le faire qu'une seule fois au chargement
+
+  const handleSaveProfile = () => {
+    const userId = localStorage.getItem("userId");
+    // envoyer les modifications au backend (PUT /api/users/{id})
+    fetch(`http://localhost:8080/api/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profileData)
+    })
+      .then(res => res.json())
+      .then(data => {
+        setIsEditing(false);
+        alert('Profile updated successfully!');
+      })
+      .catch(err => {
+        console.error('Error updating profile:', err);
+        alert('Failed to update profile');
+      });
+  };
+
+  const handleDisconnect = () => {
+    // effacer les données de session
+    localStorage.removeItem("userId");
+    // rediriger vers la page d'accueil
+    navigate("/");
+  };
 
   const age = getAgeFromBirthDate(profileData.birthDate);
 
@@ -112,7 +139,7 @@ const UserProfile = () => {
         <div className="profile-content">
           {/* Navigation sidebar */}
           <NavButtons
-            name1="Profile" 
+            name1="Profile"
             name2="Activities created" 
             name3="Upcoming activities" 
             path1="/userProfile" 
@@ -171,7 +198,7 @@ const UserProfile = () => {
                     variant="outlined"
                     value={profileData.email}
                     className="input-field"
-                    disabled={true}
+                    disabled={false}
                   />
                 </div>
                 <div className="form-field">
@@ -181,7 +208,7 @@ const UserProfile = () => {
                     variant="outlined"
                     value={age}
                     className="input-field"
-                    disabled={true}
+                    disabled={false}
                   />
                 </div>
               </div>
@@ -284,17 +311,47 @@ const UserProfile = () => {
               </div>
             </div>
 
-            {/* Example: you could later add an "Edit profile" button here 
-            <div style={{ marginTop: "2rem" }}>
+            {/* Boutons Edit Profile et Disconnect */}
+            <div className="profile-actions">
+              {isEditing ? (
+                <>
+                  <Button
+                    color="salmon"
+                    variant="contained"
+                    size="large"
+                    onClick={handleSaveProfile}
+                  >
+                    Save Changes
+                  </Button>
+                  <Button
+                    color="salmon"
+                    variant="outlined"
+                    size="large"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  color="salmon"
+                  variant="contained"
+                  size="large"
+                  onClick={() => setIsEditing(true)}
+                >
+                  Edit Profile
+                </Button>
+              )}
+              
               <Button
-                color="salmon"
+                color="error"
                 variant="contained"
                 size="large"
-                disabled
+                onClick={handleDisconnect}
               >
-                Edit (coming soon)
+                Disconnect
               </Button>
-            </div>*/}
+            </div>
 
           </div>
         </div>

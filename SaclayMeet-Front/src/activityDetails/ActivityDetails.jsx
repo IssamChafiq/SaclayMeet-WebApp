@@ -1,10 +1,10 @@
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ArrowLeft } from 'lucide-react';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './ActivityDetails.css';
 import { useNavigate } from "react-router-dom";
+import BackButton from '../components/BackButton';
 
 let theme = createTheme({});
 
@@ -44,13 +44,7 @@ const ActivityDetails = () => {
             />
           </div>
           
-          <Button 
-            className="back-button"
-            startIcon={<ArrowLeft size={24}/>}
-            color='inherit'
-            onClick={() => navigate(-1)} 
-          >Back
-          </Button>
+          <BackButton />
         </div>
 
         {/* Content */}
