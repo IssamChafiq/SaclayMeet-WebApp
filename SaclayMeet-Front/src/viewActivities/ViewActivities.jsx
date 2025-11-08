@@ -59,6 +59,7 @@ const ViewActivities = () => {
                             className="logo-saclay-meet"
                             alt="Logo saclay meet"
                             src={logoSaclayMeet1}
+                            onClick={() => navigate("/viewActivities")}
                         />
                     </div>
                     
@@ -89,46 +90,45 @@ const ViewActivities = () => {
                     />
                 </div>
 
-                <div className="content">
+                <div className="activities-content">
                     <div className="sidebar">
                         <div className="filters-box">
                             <h3 className="filters-title">Filters :</h3>
-                            
-                            <div className="filter-category">
-                                <p className="category-title">• Education</p>
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Label" 
-                                />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Label" 
-                                />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Label" 
-                                />
-                            </div>
 
                             <div className="filter-category">
-                                <p className="category-title">• Entertainement</p>
                                 <FormControlLabel 
                                     control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Label" 
+                                    label="Study" 
                                 />
                                 <FormControlLabel 
                                     control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Label" 
+                                    label="Party" 
                                 />
                                 <FormControlLabel 
                                     control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Label" 
+                                    label="Outing" 
+                                />
+                                <FormControlLabel 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
+                                    label="Movie" 
+                                />
+                                <FormControlLabel 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
+                                    label="Games" 
+                                    />
+                                <FormControlLabel 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
+                                    label="Sport" 
+                                />
+                                <FormControlLabel 
+                                    control={<Checkbox color="salmon" defaultUnchecked />} 
+                                    label="Cultural" 
                                 />
                             </div>
 
                             <div className="date-filter">
                                 <p className="date-label">After</p>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
                                     <DatePicker 
                                         label="Start date"
                                     />
@@ -137,7 +137,7 @@ const ViewActivities = () => {
 
                             <div className="date-filter">
                                 <p className="date-label">Before</p>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
                                     <DatePicker 
                                         label="End date"
                                     />
@@ -154,7 +154,6 @@ const ViewActivities = () => {
                                 title={activity.title}
                                 description={activity.description}
                                 tags={activity.tags}
-                                type="tag"
                                 onClick={() => navigate("/activityDetails")}
                             />
                         ))}

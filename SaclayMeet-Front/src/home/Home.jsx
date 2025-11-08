@@ -1,4 +1,6 @@
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
+import image2 from "../assets/image2.jpg";
+import image3 from "../assets/image3.jpg";
 import "./Home.css";
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -62,11 +64,11 @@ const Home = () => {
                                 Proposez des rencontres aux autres utilisateurs...
                             </p>
 
-                            <div className="image-2" />
+                            <div className="image-2" style={{ backgroundImage: `url(${image2})` }} />
                     </div>
 
                     <div className="images">
-                            <div className="image-3" />
+                            <div className="image-3" style={{ backgroundImage: `url(${image3})` }} />
 
                             <p className="desc">
                                 ...ou inscrivez-vous aux évènements des autres en un clic !

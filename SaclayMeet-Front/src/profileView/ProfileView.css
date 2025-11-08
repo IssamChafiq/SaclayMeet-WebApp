@@ -22,15 +22,22 @@
 }
 
 .logo-saclay-meet {
-    width: 90px;
-    height: 90px;
-    object-fit: cover;
+    transition: transform 120ms ease, filter 120ms ease;
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
-.back-button {
-    color: #000000;
-    min-width: auto;
-    padding: 8px;
+/* effet au clic (apparaît immédiatement au mousedown) */
+.logo-saclay-meet:active,
+.logo-saclay-meet:focus {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+    outline: none;
+}
+
+.logo-saclay-meet:focus-visible {
+    box-shadow: 0 0 0 3px rgba(110,0,60,0.18);
 }
 
 .profile-content {

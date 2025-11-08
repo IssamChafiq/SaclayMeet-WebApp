@@ -55,6 +55,7 @@ const ViewActivities = () => {
                             className="logo-saclay-meet"
                             alt="Logo saclay meet"
                             src={logoSaclayMeet1}
+                            onClick={() => navigate("/viewActivities")}
                         />
                     </div>
                     
@@ -107,7 +108,6 @@ const ViewActivities = () => {
                                 title={activity.title}
                                 description={activity.description}
                                 tags={activity.tags}
-                                type="subscribed"
                                 onClick={() => navigate("/activityDetails")}
                             />
                         ))}

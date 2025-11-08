@@ -10,6 +10,7 @@ import ActivityDetails from "./activityDetails/ActivityDetails";
 import ActivitiesCreated from "./activitiesCreated/ActivitiesCreated";
 import UpcomingActivities from "./upcomingActivities/UpcomingActivities";
 import ProfileView from "./profileView/ProfileView";
+import GroupChat from "./groupChat/GroupChat";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Route path="/activitiesCreated" element={<ActivitiesCreated />} />
       <Route path="/upcomingActivities" element={<UpcomingActivities />} />
       <Route path="/profileView" element={<ProfileView />} />
+      <Route path="/groupChat" element={<GroupChat />} />
     </Routes>
   );
 }

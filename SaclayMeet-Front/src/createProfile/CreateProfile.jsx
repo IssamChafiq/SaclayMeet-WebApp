@@ -6,6 +6,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import 'dayjs/locale/fr'; // importer la locale française
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
@@ -103,7 +104,7 @@ const CreateProfile = () => {
                             helperText={errors.lastName}
                         />
                         
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
                             <DatePicker 
                                 label="Birth date"
                                 value={birthDate}

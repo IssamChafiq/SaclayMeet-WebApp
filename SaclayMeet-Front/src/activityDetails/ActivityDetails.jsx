@@ -1,10 +1,11 @@
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ArrowLeft } from 'lucide-react';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './ActivityDetails.css';
 import { useNavigate } from "react-router-dom";
+import BackButton from '../components/BackButton';
+import { useState, useEffect } from 'react';
 
 let theme = createTheme({});
 
@@ -21,6 +22,8 @@ theme = createTheme(theme, {
 
 const ActivityDetails = () => {
   const navigate = useNavigate();
+  const [userType, setUserType] = useState("default"); // "owner" | "subscribed" | "default"
+  
   const activity = {
     title: "Title",
     date: "Date",
@@ -28,6 +31,35 @@ const ActivityDetails = () => {
     author: "TestMan McTest",
     tags: ["Tag", "Tag", "Tag"],
     description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story."
+  };
+
+  // Vérifier si l'utilisateur actuel est le propriétaire
+  useEffect(() => {
+    const currentUserName = localStorage.getItem("userName");
+    
+    if (currentUserName === activity.author) {
+      setUserType("owner");
+    }
+  }, []); // On peut mettre activity.author dans les dépendances si l'activité peut changer, mais pour l'instant il me semble que ce n'est pas le cas
+
+  const handleSubscribe = () => {
+    // Appel API pour s'inscrire à l'activité
+    // fetch(...).then(() => setUserType("subscribed"));
+    setUserType("subscribed");
+  };
+  
+  const handleUnsubscribe = () => {
+    // Appel API pour se désinscrire
+    // fetch(...).then(() => setUserType("default"));
+    setUserType("default");
+  };
+  
+  const handleDelete = () => {
+    // Appel API pour supprimer l'activité
+    // fetch(...).then(() => navigate("/viewActivities"));
+    if (confirm("Are you sure you want to delete this activity?")) {
+      navigate("/viewActivities");
+    }
   };
 
   return (
@@ -40,16 +72,11 @@ const ActivityDetails = () => {
               className="logo-saclay-meet"
               alt="Logo saclay meet"
               src={logoSaclayMeet1}
+              onClick={() => navigate("/viewActivities")}
             />
           </div>
           
-          <Button 
-            className="back-button"
-            startIcon={<ArrowLeft size={24}/>}
-            color='inherit'
-            onClick={() => navigate(-1)} 
-          >Back
-          </Button>
+          <BackButton />
         </div>
 
         {/* Content */}
@@ -86,14 +113,66 @@ const ActivityDetails = () => {
                   {activity.description}
                 </p>
 
-                <Button 
-                  variant="contained" 
-                  color="salmon"
-                  fullWidth
-                  className="subscribe-button"
-                >
-                  Subscribe to the activity
-                </Button>
+                {/* Boutons selon le type d'utilisateur */}
+                {userType === "owner" && (
+                  <>
+                    <Button 
+                      variant="contained" 
+                      color="error"
+                      fullWidth
+                      className="delete-button"
+                      onClick={handleDelete}
+                    >
+                      Delete activity
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      color="salmon"
+                      fullWidth
+                      className="chat-button"
+                      onClick={() => navigate("/groupChat")}
+                      style={{ marginTop: '12px' }}
+                    >
+                      Activity group chat
+                    </Button>
+                  </>
+                )}
+
+                {userType === "subscribed" && (
+                  <>
+                    <Button 
+                      variant="contained" 
+                      color="error"
+                      fullWidth
+                      className="unsubscribe-button"
+                      onClick={handleUnsubscribe}
+                    >
+                      Unsubscribe from activity
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      color="salmon"
+                      fullWidth
+                      className="chat-button"
+                      onClick={() => navigate("/groupChat")}
+                      style={{ marginTop: '12px' }}
+                    >
+                      Activity group chat
+                    </Button>
+                  </>
+                )}
+
+                {userType === "default" && (
+                  <Button 
+                    variant="contained" 
+                    color="salmon"
+                    fullWidth
+                    className="subscribe-button"
+                    onClick={handleSubscribe}
+                  >
+                    Subscribe to the activity
+                  </Button>
+                )}
               </div>
             </div>
           </div>

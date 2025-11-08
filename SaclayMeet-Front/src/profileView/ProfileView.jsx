@@ -3,10 +3,10 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { ArrowLeft } from 'lucide-react';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './ProfileView.css';
 import { useNavigate } from "react-router-dom";
+import BackButton from '../components/BackButton';
 
 let theme = createTheme({});
 
@@ -20,6 +20,21 @@ theme = createTheme(theme, {
     }),
   },
 });
+
+// petite fonction utilitaire pour calculer l'âge à partir de birthDate ("YYYY-MM-DD")
+function getAgeFromBirthDate(birthDateStr) {
+  if (!birthDateStr) return "";
+  const today = new Date();
+  const [year, month, day] = birthDateStr.split("-").map(Number);
+  const birthDate = new Date(year, month - 1, day);
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return String(age);
+}
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -48,16 +63,11 @@ const UserProfile = () => {
               className="logo-saclay-meet"
               alt="Logo saclay meet"
               src={logoSaclayMeet1}
+              onClick={() => navigate("/viewActivities")}
             />
           </div>
           
-          <Button 
-            className="back-button"
-            startIcon={<ArrowLeft size={24}/>}
-            color='inherit'
-            onClick={() => navigate(-1)} 
-          >Back
-          </Button>
+          <BackButton />
         </div>
 
         <div className="profile-content">
