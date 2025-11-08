@@ -41,8 +41,8 @@ const CreateActivity = () => {
     educationTags: [true, true, true],
     entertainmentTags: [true, true, true]
   });
-  const [imagePreview, setImagePreview] = useState(placeholder);
-  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(placeholder); // URL de l'image à afficher
+  const [imageFile, setImageFile] = useState(null); // objet file de l'image sélectionnée
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -50,14 +50,18 @@ const CreateActivity = () => {
   });
 
   const handleImageUpload = (event) => {
+    // Récupérer le premier fichier sélectionné
     const file = event.target.files[0];
     if (file) {
+      // Stocker le fichier dans le state
       setImageFile(file);
-      // Créer une URL de prévisualisation
+      // Créer une URL de prévisualisation localement
       const reader = new FileReader();
       reader.onloadend = () => {
+        // Contient la data URL de l'image
         setImagePreview(reader.result);
       };
+      // Lecture du fichier comme dataURL
       reader.readAsDataURL(file);
     }
   };
@@ -141,12 +145,13 @@ const CreateActivity = () => {
             <div className="image-upload-container">
               <img className="image-placeholder" src={imagePreview} alt="Activity preview"/>
               <input
-                accept="image/*"
-                style={{ display: 'none' }}
+                accept="image/*" // accepte que les images
+                style={{ display: 'none' }} // On le cache parce que c'est moche
                 id="image-upload-input"
                 type="file"
                 onChange={handleImageUpload}
               />
+              {/*Label qui agit comme bouton pour l'input caché*/}
               <label htmlFor="image-upload-input">
                 <Button
                   variant="contained"

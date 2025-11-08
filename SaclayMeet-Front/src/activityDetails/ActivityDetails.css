@@ -133,3 +133,10 @@
     padding: 12px 24px;
     border-radius: 8px;
 }
+
+.author-link {
+    color: #6E003C;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+}

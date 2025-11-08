@@ -71,6 +71,7 @@ const Register = () => {
 
           // Sauvegarde l’ID de l’utilisateur dans localStorage
           localStorage.setItem("userId", data.id);
+          localStorage.setItem("userName", ""); // Initialement vide
 
           // Passe à la page suivante
           navigate("/createProfile");

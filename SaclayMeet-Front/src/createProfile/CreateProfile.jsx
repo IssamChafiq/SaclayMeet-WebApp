@@ -64,7 +64,8 @@ const CreateProfile = () => {
 
         if (!newErrors.firstName && !newErrors.lastName && !newErrors.birthDate && !newErrors.schoolName && !newErrors.level) {
             if (response.ok) {
-              navigate("/viewActivities");
+                localStorage.setItem("userName", `${firstName} ${lastName}`);
+                navigate("/viewActivities");
             }
         }
     };

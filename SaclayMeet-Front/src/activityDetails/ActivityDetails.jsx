@@ -28,16 +28,17 @@ const ActivityDetails = () => {
     title: "Title",
     date: "Date",
     place: "Place",
-    author: "TestMan McTest",
+    authorID: localStorage.getItem("userId"), // à retirer une fois l'API en place
+    author: localStorage.getItem("userName"), // pareil
     tags: ["Tag", "Tag", "Tag"],
     description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story."
   };
 
   // Vérifier si l'utilisateur actuel est le propriétaire
   useEffect(() => {
-    const currentUserName = localStorage.getItem("userName");
-    
-    if (currentUserName === activity.author) {
+    const currentUserId = localStorage.getItem("userId");
+
+    if (currentUserId === activity.authorID) {
       setUserType("owner");
     }
   }, []); // On peut mettre activity.author dans les dépendances si l'activité peut changer, mais pour l'instant il me semble que ce n'est pas le cas
@@ -59,6 +60,15 @@ const ActivityDetails = () => {
     // fetch(...).then(() => navigate("/viewActivities"));
     if (confirm("Are you sure you want to delete this activity?")) {
       navigate("/viewActivities");
+    }
+  };
+
+  const handleAuthorClick = () => {
+    const currentUserId = localStorage.getItem("userId");
+    if (currentUserId === activity.authorID) {
+      navigate("/userProfile");
+    } else {
+      navigate("/profileView");
     }
   };
 
@@ -91,7 +101,16 @@ const ActivityDetails = () => {
                 <h1 className="activity-title">{activity.title}</h1>
                 <p className="activity-date">{activity.date}</p>
                 <p className="activity-place">{activity.place}</p>
-                <p className="activity-author" onClick={() => navigate("/profileView")} style={{ cursor: "pointer" }}>By {activity.author}</p>
+                <p className="activity-author">
+                  By {' '}
+                  <span
+                    className="author-link"
+                    onClick={handleAuthorClick}
+                  >
+                    {activity.author}
+                  </span>
+                </p>
+                
                 
                 <div className="activity-tags">
                   {activity.tags.map((tag, index) => (
