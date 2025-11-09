@@ -1,57 +1,122 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './ProfileView.css';
-import { useNavigate } from "react-router-dom";
 import BackButton from '../components/BackButton';
 
 let theme = createTheme({});
-
 theme = createTheme(theme, {
   palette: {
     salmon: theme.palette.augmentColor({
-      color: {
-        main: '#6E003C',
-      },
+      color: { main: '#6E003C' },
       name: 'salmon',
     }),
   },
 });
 
-// petite fonction utilitaire pour calculer l'âge à partir de birthDate ("YYYY-MM-DD")
+// birthDate from backend is "YYYY-MM-DD"
 function getAgeFromBirthDate(birthDateStr) {
   if (!birthDateStr) return "";
   const today = new Date();
-  const [year, month, day] = birthDateStr.split("-").map(Number);
-  const birthDate = new Date(year, month - 1, day);
-
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
+  const [y, m, d] = birthDateStr.split("-").map(Number);
+  const birth = new Date(y, (m || 1) - 1, d || 1);
+  let age = today.getFullYear() - birth.getFullYear();
+  const mm = today.getMonth() - birth.getMonth();
+  if (mm < 0 || (mm === 0 && today.getDate() < birth.getDate())) age--;
   return String(age);
 }
 
-const UserProfile = () => {
+const ProfileView = () => {
   const navigate = useNavigate();
-  
-  const [profileData, setProfileData] = useState({
-    firstName: 'TestMan',
-    lastName: 'McTest',
-    email: 'testtesttest@gmail.com',
-    age: '21',
-    school: 'Polytech Paris-Saclay',
-    level: 'M2',
-    bio: 'Nam pellentesque sollicitudin lorem, a malesuada velit suscipit vel. Sed faucibus lobortis nibh, quis sollicitudin justo vulputate et. Morbi dignissim, nisi sit amet posuere dictum, libero dui scelerisque ante, eleifend viverra sapien lorem quis odio. In dignissim nec ligula at congue. Fusce quis scelerisque augue. Aenean sollicitudin nibh vel placerat vulputate. Proin sed purus magna.',
-    facebook: '@TestMan',
-    snapchat: '@TestMan',
-    instagram: '@TestMan',
-    linkedin: '@TestMan'
-  });
+  const { userId } = useParams(); // /profileView/:userId
+
+  const [user, setUser] = useState(null);   // raw user from backend
+  const [loading, setLoading] = useState(true);
+
+  // load user by id
+  useEffect(() => {
+    let ignore = false;
+    (async () => {
+      if (!userId) { setLoading(false); return; }
+      try {
+        const res = await fetch(`http://localhost:8080/api/users/${userId}`);
+        if (!ignore) {
+          if (res.ok) {
+            const data = await res.json();
+            setUser(data);
+          }
+          setLoading(false);
+        }
+      } catch {
+        if (!ignore) setLoading(false);
+      }
+    })();
+    return () => { ignore = true; };
+  }, [userId]);
+
+  const profile = useMemo(() => {
+    if (!user) return null;
+    const firstName = user.firstName || "";
+    const lastName  = user.lastName  || "";
+    const email     = user.email     || "";
+    const school    = user.schoolName || "";
+    const level     = user.level || "";
+    const bio       = user.bio || "";
+    const birthDate = user.birthDate || ""; // "YYYY-MM-DD"
+    const age       = getAgeFromBirthDate(birthDate);
+
+    return { firstName, lastName, email, school, level, bio, age };
+  }, [user]);
+
+  if (loading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <div className="profile-page">
+          <div className="header">
+            <div className="logo-box">
+              <img
+                className="logo-saclay-meet"
+                alt="Logo saclay meet"
+                src={logoSaclayMeet1}
+                onClick={() => navigate("/viewActivities")}
+              />
+            </div>
+            <BackButton />
+          </div>
+          <div style={{ padding: 24 }}>Loading…</div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <ThemeProvider theme={theme}>
+        <div className="profile-page">
+          <div className="header">
+            <div className="logo-box">
+              <img
+                className="logo-saclay-meet"
+                alt="Logo saclay meet"
+                src={logoSaclayMeet1}
+                onClick={() => navigate("/viewActivities")}
+              />
+            </div>
+            <BackButton />
+          </div>
+          <div style={{ padding: 24 }}>User not found.</div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  const { firstName, lastName, email, age, school, level, bio } = profile;
+  const fullName = `${firstName} ${lastName}`.trim();
+  const avatarLetter = (firstName || lastName) ? (firstName?.[0] || lastName?.[0] || "?") : "?";
 
   return (
     <ThemeProvider theme={theme}>
@@ -66,7 +131,6 @@ const UserProfile = () => {
               onClick={() => navigate("/viewActivities")}
             />
           </div>
-          
           <BackButton />
         </div>
 
@@ -77,81 +141,47 @@ const UserProfile = () => {
             <div className="profile-header">
               <Avatar
                 className="profile-avatar"
-                alt="TestMan McTest"
-                sx={{ width: 100, height: 100 }}
-              />
-              <h1 className="profile-name">TestMan McTest</h1>
-              <p className="profile-email">testtesttest@gmail.com</p>
+                alt={fullName || "User"}
+                sx={{ width: 100, height: 100, fontSize: 36 }}
+              >
+                {avatarLetter}
+              </Avatar>
+              <h1 className="profile-name">{fullName || "Unknown"}</h1>
+              <p className="profile-email">{email}</p>
             </div>
 
-            {/* Form fields */}
+            {/* Read-only fields */}
             <div className="profile-form">
               <div className="form-row">
                 <div className="form-field">
                   <label className="field-label">First name</label>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    defaultValue="TestMan"
-                    className="input-field"
-                    disabled={true}
-                  />
+                  <TextField fullWidth variant="filled" value={firstName} disabled />
                 </div>
                 <div className="form-field">
                   <label className="field-label">Last name</label>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    defaultValue="McTest"
-                    className="input-field"
-                    disabled={true}
-                  />
+                  <TextField fullWidth variant="filled" value={lastName} disabled />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-field">
                   <label className="field-label">Email</label>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    defaultValue="testtesttest@gmail.com"
-                    className="input-field"
-                    disabled={true}
-                  />
+                  <TextField fullWidth variant="filled" value={email} disabled />
                 </div>
                 <div className="form-field">
                   <label className="field-label">Age</label>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    defaultValue="21"
-                    className="input-field"
-                    disabled={true}
-                  />
+                  <TextField fullWidth variant="filled" value={age} disabled />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-field">
                   <label className="field-label">School</label>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    defaultValue="Polytech Paris-Saclay"
-                    className="input-field"
-                    disabled={true}
-                  />
+                  <TextField fullWidth variant="filled" value={school} disabled />
                 </div>
                 <div className="form-field">
                   <label className="field-label">Level</label>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    defaultValue="M2"
-                    className="input-field"
-                    disabled={true}
-                  />
+                  <TextField fullWidth variant="filled" value={level} disabled />
                 </div>
               </div>
 
@@ -162,76 +192,12 @@ const UserProfile = () => {
                   multiline
                   rows={4}
                   variant="filled"
-                  defaultValue="Nam pellentesque sollicitudin lorem, a malesuada velit suscipit vel. Sed faucibus lobortis nibh, quis sollicitudin justo vulputate et. Morbi dignissim, nisi sit amet posuere dictum, libero dui scelerisque ante, eleifend viverra sapien lorem quis odio. In dignissim nec ligula at congue. Fusce quis scelerisque augue. Aenean sollicitudin nibh vel placerat vulputate. Proin sed purus magna."
-                  className="input-field"
-                  disabled={true}
+                  value={bio}
+                  disabled
                 />
               </div>
 
-              {/* Social media links */}
-              <div className="social-section">
-                <div className="social-row">
-                  <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" 
-                      alt="Facebook"
-                      className="social-icon"
-                    />
-                    <TextField
-                      fullWidth
-                      variant="filled"
-                      defaultValue="@TestMan"
-                      className="input-field"
-                      disabled={true}
-                    />
-                  </div>
-                  <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" 
-                      alt="Instagram"
-                      className="social-icon"
-                    />
-                    <TextField
-                      fullWidth
-                      variant="filled"
-                      defaultValue="@TestMan"
-                      className="input-field"
-                      disabled={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="social-row">
-                  <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/en/c/c4/Snapchat_logo.svg" 
-                      alt="Snapchat"
-                      className="social-icon"
-                    />
-                    <TextField
-                      fullWidth
-                      variant="filled"
-                      defaultValue="@TestMan"
-                      className="input-field"
-                      disabled={true}
-                    />
-                  </div>
-                  <div className="social-field">
-                    <img 
-                      src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" 
-                      alt="LinkedIn"
-                      className="social-icon"
-                    />
-                    <TextField
-                      fullWidth
-                      variant="filled"
-                      defaultValue="@TestMan"
-                      className="input-field"
-                      disabled={true}
-                    />
-                  </div>
-                </div>
-              </div>
+              {/* optional socials later */}
             </div>
           </div>
         </div>
@@ -240,4 +206,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default ProfileView;

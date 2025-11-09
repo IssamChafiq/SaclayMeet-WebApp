@@ -31,7 +31,7 @@ function App() {
 
       <Route path="/activitiesCreated" element={<ActivitiesCreated />} />
       <Route path="/upcomingActivities" element={<UpcomingActivities />} />
-      <Route path="/profileView" element={<ProfileView />} />
+      <Route path="/profileView/:userId" element={<ProfileView />} />
 
       {/* Group chat (dynamic) */}
       <Route path="/groupChat/:activityId" element={<GroupChat />} />

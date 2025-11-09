@@ -183,7 +183,8 @@ const ActivityDetails = () => {
                 <p className="activity-place">{location}</p>
                 <p
                   className="activity-author"
-                  onClick={() => navigate("/profileView")}
+                  // inside ActivityDetails.jsx
+                  onClick={() => navigate(`/profileView/${organizer?.id}`)}
                   style={{ cursor: "pointer" }}
                 >
                   By {authorName || "Unknown"}
