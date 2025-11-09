@@ -64,8 +64,8 @@ const SignIn = () => {
           const data = await response.json();
 
           // Connexion réussie : on sauvegarde l'ID utilisateur et son nom d'utilisateur (prenom + nom).
-          localStorage.setItem("userId", data.id);
-          localStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
+          sessionStorage.setItem("userId", data.id);
+          sessionStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
           
           // Rediriger vers la page d'activités
           navigate("/viewActivities");

@@ -26,7 +26,7 @@ const ActivitiesCreated = () => {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const userId = Number(localStorage.getItem("userId"));
+    const userId = Number(sessionStorage.getItem("userId"));
     if (!userId) return;
 
     fetch(`http://localhost:8080/api/activities/organizer/${userId}`)

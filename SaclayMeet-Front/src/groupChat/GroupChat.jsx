@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import { Send } from 'lucide-react';
-
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Alert from '@mui/material/Alert';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
 import BackButton from '../components/BackButton';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './GroupChat.css';
@@ -28,153 +26,190 @@ const fmtTime = (iso) => {
   return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 };
 
+// tiny helper to fetch with a 5s timeout and safe JSON
+async function safeFetchJson(url, options = {}, timeoutMs = 5000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: ctrl.signal });
+    if (!res.ok) return { ok: false, status: res.status, data: null };
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : null;
+    return { ok: true, status: res.status, data };
+  } catch (e) {
+    return { ok: false, status: 0, data: null };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+const fullName = (u) => {
+  if (!u) return null;
+  const fn = (u.firstName || "").trim();
+  const ln = (u.lastName || "").trim();
+  const combo = `${fn} ${ln}`.trim();
+  return combo || (u.username || null) || null;
+};
+
 const GroupChat = () => {
   const navigate = useNavigate();
-  const { activityId } = useParams(); // MUST be routed as /groupChat/:activityId
+  const { activityId: rawActivityId } = useParams();
 
-  // user id from localStorage (string -> number)
-  const stored = localStorage.getItem("userId");
-  const currentUserId = stored ? Number(stored) : NaN; // if null -> NaN
+  // Guard against "null" / undefined / non-number
+  const activityId = useMemo(() => {
+    if (!rawActivityId || rawActivityId === 'null') return null;
+    const n = Number(rawActivityId);
+    return Number.isFinite(n) ? n : null;
+  }, [rawActivityId]);
+
+  // Use sessionStorage for per-tab login isolation
+  const currentUserId = Number(sessionStorage.getItem("userId")); // NaN if not logged
+  const notLoggedIn = Number.isNaN(currentUserId);
 
   const [activityTitle, setActivityTitle] = useState("Group Chat");
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [warn, setWarn] = useState("");
 
-  const messagesEndRef = useRef(null);
-  const headerSubtitle = useMemo(() => "Discussion about the activity", []);
+  // name cache: { [userId]: "First Last" }
+  const [nameById, setNameById] = useState({});
+  const [pendingFetch, setPendingFetch] = useState(new Set());
 
-  // scroll to bottom on new messages
+  const endRef = useRef(null);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const ensureUserName = async (userId) => {
+    if (!userId || nameById[userId]) return;
+    if (pendingFetch.has(userId)) return;
+    setPendingFetch(prev => new Set(prev).add(userId));
+
+    const res = await safeFetchJson(`http://localhost:8080/api/users/${userId}`);
+    if (res.ok && res.data) {
+      const label = fullName(res.data) || `User ${userId}`;
+      setNameById(prev => ({ ...prev, [userId]: label }));
+    } else {
+      setNameById(prev => ({ ...prev, [userId]: `User ${userId}` }));
+    }
+
+    setPendingFetch(prev => {
+      const next = new Set(prev);
+      next.delete(userId);
+      return next;
+    });
+  };
+
+  // initial load
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Initial load
-  useEffect(() => {
-    let canceled = false;
+    let cancelled = false;
 
     (async () => {
-      // If the route param is missing, stop loading and show message
-      if (!activityId) {
+      if (activityId == null) {
+        setWarn("Missing or invalid activity id in the URL.");
         setLoading(false);
-        setErrorMsg("Missing activity id in route. Navigate via /groupChat/:activityId.");
         return;
       }
 
-      try {
-        // ensure conversation exists (ignore response errors)
-        await fetch(`http://localhost:8080/api/messages/ensure-conversation/${activityId}`, { method: "POST" }).catch(() => {});
+      // ensure conversation (best-effort, now race-safe on backend)
+      await safeFetchJson(`http://localhost:8080/api/messages/ensure-conversation/${activityId}`, { method: "POST" });
 
-        // load activity title
-        const aRes = await fetch(`http://localhost:8080/api/activities/${activityId}`);
-        if (aRes.ok) {
-          const a = await aRes.json();
-          if (!canceled) setActivityTitle(a?.title || "Group Chat");
-        } else if (!canceled) {
-          setErrorMsg("Unable to load activity details.");
-        }
-
-        // load messages
-        const res = await fetch(`http://localhost:8080/api/messages/activity/${activityId}`);
-        if (res.ok) {
-          const data = await res.json();
-          const mapped = (Array.isArray(data) ? data : []).map(m => ({
-            id: m.id,
-            userId: m.userId,
-            userName: m.userName || "Unknown",
-            text: m.body,
-            timestamp: fmtTime(m.sentAt),
-          }));
-          if (!canceled) setMessages(mapped);
-        } else if (!canceled) {
-          setErrorMsg("Unable to load messages.");
-        }
-      } catch (e) {
-        if (!canceled) setErrorMsg("Network error while loading chat.");
-        console.error(e);
-      } finally {
-        if (!canceled) setLoading(false);
+      // load activity title
+      const a = await safeFetchJson(`http://localhost:8080/api/activities/${activityId}`);
+      if (!cancelled && a.ok && a.data) {
+        setActivityTitle(a.data.title || "Group Chat");
+        if (a.data.organizer?.id) ensureUserName(a.data.organizer.id);
       }
-    })();
 
-    return () => { canceled = true; };
-  }, [activityId]);
+      // load messages
+      const m = await safeFetchJson(`http://localhost:8080/api/messages/activity/${activityId}`);
+      if (cancelled) return;
 
-  // Optional polling (every 5s)
-  useEffect(() => {
-    if (!activityId) return;
-    const t = setInterval(async () => {
-      try {
-        const res = await fetch(`http://localhost:8080/api/messages/activity/${activityId}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const mapped = (Array.isArray(data) ? data : []).map(m => ({
-          id: m.id,
-          userId: m.userId,
-          userName: m.userName || "Unknown",
-          text: m.body,
-          timestamp: fmtTime(m.sentAt),
+      if (m.ok && Array.isArray(m.data)) {
+        const mapped = m.data.map(x => ({
+          id: x.id,
+          userId: x.userId,
+          text: x.body,
+          timestamp: fmtTime(x.sentAt),
         }));
         setMessages(mapped);
-      } catch {}
-    }, 5000);
-    return () => clearInterval(t);
-  }, [activityId]);
 
-  const canSend = newMessage.trim().length > 0 && !Number.isNaN(currentUserId);
+        const uniqueIds = [...new Set(mapped.map(mm => mm.userId).filter(Boolean))];
+        uniqueIds.forEach(uid => ensureUserName(uid));
+        if (!Number.isNaN(currentUserId)) ensureUserName(currentUserId);
+      } else {
+        setWarn("Unable to load chat messages right now.");
+      }
+      setLoading(false);
+    })();
 
-  const handleSendMessage = async () => {
+    return () => { cancelled = true; };
+  }, [activityId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const canSend = newMessage.trim().length > 0 && !notLoggedIn && activityId != null;
+
+  const myDisplayName = useMemo(() => {
+    if (notLoggedIn) return null;
+    return nameById[currentUserId] || `User ${currentUserId}`;
+  }, [nameById, currentUserId, notLoggedIn]);
+
+  const handleSend = async () => {
     const body = newMessage.trim();
-    if (!body) return;
+    if (!body || notLoggedIn || activityId == null) return;
 
-    if (Number.isNaN(currentUserId)) {
-      setErrorMsg("You must be signed in to send messages.");
-      return;
-    }
-    if (!activityId) {
-      setErrorMsg("Invalid activity id.");
-      return;
-    }
+    ensureUserName(currentUserId);
 
-    try {
-      const res = await fetch(`http://localhost:8080/api/messages/activity/${activityId}`, {
+    // optimistic add
+    const tempId = `tmp-${Date.now()}`;
+    const optimistic = {
+      id: tempId,
+      userId: currentUserId,
+      text: body,
+      timestamp: fmtTime(new Date().toISOString()),
+    };
+    setMessages(prev => [...prev, optimistic]);
+    setNewMessage('');
+
+    const res = await safeFetchJson(
+      `http://localhost:8080/api/messages/activity/${activityId}`,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserId, body })
-      });
-
-      if (!res.ok) {
-        setErrorMsg(`Send failed (status ${res.status}).`);
-        return;
+        body: JSON.stringify({ userId: currentUserId, body }),
       }
+    );
 
-      const saved = await res.json(); // {id,userId,userName,body,sentAt}
-      setMessages(prev => [
-        ...prev,
-        {
-          id: saved.id,
-          userId: saved.userId,
-          userName: saved.userName || "Me",
-          text: saved.body,
-          timestamp: fmtTime(saved.sentAt),
-        }
-      ]);
-      setNewMessage('');
-    } catch (e) {
-      console.error(e);
-      setErrorMsg("Network error while sending.");
+    if (!res.ok || !res.data) {
+      // rollback optimistic if failed
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+      setWarn("Send failed. Try again later.");
+      return;
     }
+
+    const saved = res.data;
+    if (saved.userId) ensureUserName(saved.userId);
+
+    // replace optimistic with real one
+    setMessages(prev => prev.map(m => m.id === tempId ? ({
+      id: saved.id,
+      userId: saved.userId,
+      text: saved.body,
+      timestamp: fmtTime(saved.sentAt),
+    }) : m));
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleSend();
     }
   };
 
-  const notLoggedIn = Number.isNaN(currentUserId);
+  const displayNameFor = (msg) => {
+    if (!msg?.userId) return "Unknown";
+    return nameById[msg.userId] || `User ${msg.userId}`;
+  };
+
+  const initialFor = (name) => (name && name.trim()[0]) ? name.trim()[0].toUpperCase() : "?";
 
   return (
     <ThemeProvider theme={theme}>
@@ -187,11 +222,10 @@ const GroupChat = () => {
           <BackButton />
         </div>
 
-        {/* Warnings */}
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
-          {errorMsg && <Alert severity="warning" sx={{ mb: 2 }}>{errorMsg}</Alert>}
+          {warn && <Alert severity="warning" sx={{ mb: 2 }}>{warn}</Alert>}
           {notLoggedIn && <Alert severity="info" sx={{ mb: 2 }}>You’re not logged in. Sign in to send messages.</Alert>}
-          {!activityId && <Alert severity="info" sx={{ mb: 2 }}>Open chat via a specific activity (e.g. “Activity group chat” button).</Alert>}
+          {activityId == null && <Alert severity="info" sx={{ mb: 2 }}>Open chat from an activity page.</Alert>}
         </div>
 
         {/* Chat Container */}
@@ -203,42 +237,30 @@ const GroupChat = () => {
               <p className="chat-subtitle">Discussion about the activity</p>
             </div>
 
-            {/* Messages Area */}
+            {/* Messages */}
             <div className="messages-area">
               {loading && <div style={{ opacity: 0.7 }}>Loading…</div>}
-
-              {!loading && messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`message-wrapper ${message.userId === currentUserId ? 'own-message' : 'other-message'}`}
-                >
-                  {message.userId !== currentUserId && (
-                    <Avatar className="message-avatar">
-                      {message.userName?.charAt(0) || "?"}
-                    </Avatar>
-                  )}
-
-                  <div className="message-content">
-                    {message.userId !== currentUserId && (
-                      <p className="message-author">{message.userName}</p>
-                    )}
-                    <div className={`message-bubble ${message.userId === currentUserId ? 'own-bubble' : 'other-bubble'}`}>
-                      <p className="message-text">{message.text}</p>
+              {!loading && messages.map(m => {
+                const name = displayNameFor(m);
+                const isMe = m.userId === currentUserId;
+                return (
+                  <div key={m.id} className={`message-wrapper ${isMe ? 'own-message' : 'other-message'}`}>
+                    {!isMe && <Avatar className="message-avatar">{initialFor(name)}</Avatar>}
+                    <div className="message-content">
+                      {!isMe && <p className="message-author">{name}</p>}
+                      <div className={`message-bubble ${isMe ? 'own-bubble' : 'other-bubble'}`}>
+                        <p className="message-text">{m.text}</p>
+                      </div>
+                      <p className="message-time">{m.timestamp}</p>
                     </div>
-                    <p className="message-time">{message.timestamp}</p>
+                    {isMe && <Avatar className="message-avatar own-avatar">{initialFor(myDisplayName)}</Avatar>}
                   </div>
-
-                  {message.userId === currentUserId && (
-                    <Avatar className="message-avatar own-avatar">
-                      {message.userName?.charAt(0) || "M"}
-                    </Avatar>
-                  )}
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
+                );
+              })}
+              <div ref={endRef} />
             </div>
 
-            {/* Input Area */}
+            {/* Input */}
             <div className="input-area">
               <TextField
                 fullWidth
@@ -248,15 +270,15 @@ const GroupChat = () => {
                 variant="outlined"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onKeyDown={onKeyDown}
                 className="message-input"
               />
               <IconButton
                 color="salmon"
-                onClick={handleSendMessage}
+                onClick={handleSend}
                 className="send-button"
                 disabled={!canSend}
-                title={notLoggedIn ? "Sign in to send" : "Send"}
+                title={notLoggedIn ? "Sign in to send" : (activityId == null ? "Open from activity" : "Send")}
               >
                 <Send size={24} />
               </IconButton>

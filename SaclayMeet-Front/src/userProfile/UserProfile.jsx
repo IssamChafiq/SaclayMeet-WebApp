@@ -69,7 +69,7 @@ const UserProfile = () => {
 
   // aller chercher l'utilisateur dans le back dès que la page charge
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
+    const userId = sessionStorage.getItem("userId");
 
     fetch(`http://localhost:8080/api/users/${userId}`)
       .then(res => res.json())
@@ -92,7 +92,7 @@ const UserProfile = () => {
   }, []); // [] = ne le faire qu'une seule fois au chargement
 
   const handleSaveProfile = async () => {
-    const userId = localStorage.getItem("userId");
+    const userId = sessionStorage.getItem("userId");
     
     try {
       const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
@@ -104,7 +104,7 @@ const UserProfile = () => {
       if (!response.ok) throw new Error('Server error');
       
       const data = await response.json();
-      localStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
+      sessionStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
       setIsEditing(false);
       setSnackbar({
         open: true,
@@ -127,7 +127,7 @@ const UserProfile = () => {
 
   const handleDisconnect = () => {
     // effacer les données de session
-    localStorage.removeItem("userId");
+    sessionStorage.removeItem("userId");
     // rediriger vers la page d'accueil
     navigate("/");
   };

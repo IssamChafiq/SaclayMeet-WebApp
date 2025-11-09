@@ -69,8 +69,8 @@ const Register = () => {
         if (response.ok) {
           const data = await response.json();
 
-          // Sauvegarde l’ID de l’utilisateur dans localStorage
-          localStorage.setItem("userId", data.id);
+          // Sauvegarde l’ID de l’utilisateur dans sessionStorage
+          sessionStorage.setItem("userId", data.id);
 
           // Passe à la page suivante
           navigate("/createProfile");

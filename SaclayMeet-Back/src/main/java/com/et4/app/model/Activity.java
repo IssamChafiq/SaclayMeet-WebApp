@@ -1,9 +1,15 @@
 package com.et4.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * Activity entity used by the UI (listings, details, etc.)
+ * Key fix: @JsonIgnore on 'conversation' to prevent infinite JSON recursion
+ * once a Conversation is linked to this Activity.
+ */
 @Entity
 @Table(name = "activity")
 public class Activity {
@@ -43,13 +49,25 @@ public class Activity {
     @JoinColumn(name = "image_id")
     private Image image;
 
+    // If Registration has a back-reference to Activity, consider @JsonIgnore here too
     @OneToMany(mappedBy = "activity")
     private List<Registration> registrations = new ArrayList<>();
 
+    /**
+     * IMPORTANT:
+     * Your Conversation entity MUST have the owning side:
+     *   @OneToOne
+     *   @JoinColumn(name = "activity_id", unique = true, nullable = false)
+     *   private Activity activity;
+     *
+     * And here, since Activity is the inverse side (mappedBy = "activity"),
+     * we ignore it in JSON to avoid recursion when serializing Activity.
+     */
     @OneToOne(mappedBy = "activity")
+    @JsonIgnore
     private Conversation conversation;
 
-    // participants as user IDs
+    // participants as user IDs (denormalized for quick checks in the UI)
     @ElementCollection
     @CollectionTable(name = "activity_participants", joinColumns = @JoinColumn(name = "activity_id"))
     @Column(name = "user_id")
@@ -62,7 +80,15 @@ public class Activity {
     @Column(name = "tag")
     private Set<Tag> tags = new HashSet<>();
 
-    // Getters & Setters
+    // --- Lifecycle ---
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
+
+    // --- Getters & Setters ---
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -120,6 +146,7 @@ public class Activity {
             this.participantIds.add(userId);
         }
     }
+
     public void removeParticipant(Integer userId) {
         if (userId == null) return;
         this.participantIds.remove(userId);

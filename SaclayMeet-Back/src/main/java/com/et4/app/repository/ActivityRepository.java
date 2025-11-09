@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Integer> {
@@ -21,6 +22,9 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
     List<Activity> findByStartTimeAfter(LocalDateTime after);
     List<Activity> findByStartTimeBefore(LocalDateTime before);
     List<Activity> findByStartTimeBetween(LocalDateTime after, LocalDateTime before);
+
+    @Override
+    Optional<Activity> findById(Integer id);
 
     // “Any of these tags” match (JPA will join the element collection)
     List<Activity> findByTagsIn(List<Tag> tags);

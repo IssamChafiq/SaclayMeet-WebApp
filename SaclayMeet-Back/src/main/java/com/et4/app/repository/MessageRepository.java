@@ -7,9 +7,6 @@ import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
-    // list messages in a conversation ordered by time
-    List<Message> findByConversationIdOrderBySentAtAsc(Integer conversationId);
-
-    // convenience if you want to fetch directly by activity
+    // this matches what the front needs: messages for an activity, oldest first
     List<Message> findByConversation_Activity_IdOrderBySentAtAsc(Integer activityId);
 }

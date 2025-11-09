@@ -28,7 +28,7 @@ function formatDateTime(dt) {
 const ActivityDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // route: /activity/:id
-  const currentUserId = Number(localStorage.getItem("userId"));
+  const currentUserId = Number(sessionStorage.getItem("userId"));
 
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);

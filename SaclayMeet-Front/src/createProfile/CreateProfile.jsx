@@ -43,7 +43,7 @@ const CreateProfile = () => {
         };
         setErrors(newErrors);
 
-        const userId = localStorage.getItem("userId");
+        const userId = sessionStorage.getItem("userId");
 
         const profileData = {
           firstName: firstName,

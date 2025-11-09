@@ -28,7 +28,7 @@ const UpcomingActivities = () => {
 
   // Load activities the current user joined
   useEffect(() => {
-    const uid = Number(localStorage.getItem("userId"));
+    const uid = Number(sessionStorage.getItem("userId"));
     if (!uid) return; // not logged in
 
     fetch(`http://localhost:8080/api/activities/joined/${uid}`)
