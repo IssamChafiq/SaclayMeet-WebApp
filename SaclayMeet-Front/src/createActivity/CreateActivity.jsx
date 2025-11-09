@@ -17,96 +17,101 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 let theme = createTheme({});
-
 theme = createTheme(theme, {
   palette: {
     salmon: theme.palette.augmentColor({
-      color: {
-        main: '#6E003C',
-      },
+      color: { main: '#6E003C' },
       name: 'salmon',
     }),
   },
 });
 
+// Must match backend enum names exactly
+const ALL_TAGS = ["Study", "Party", "Outing", "Movie", "Games", "Sport", "Cultural"];
+
 const CreateActivity = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: 'Tutoring help',
-    place: 'Bat 620',
-    date: null,
-    startTime: null,
-    endTime: null,
-    description: 'Please help with tutoring !',
-    educationTags: [true, true, true],
-    entertainmentTags: [true, true, true]
-  });
+
+  const [title, setTitle] = useState("Tutoring help");
+  const [location, setLocation] = useState("Bat 620");
+  const [date, setDate] = useState(null);
+  const [startTimeStr, setStartTimeStr] = useState("16:00");
+  const [endTimeStr, setEndTimeStr] = useState("18:00");
+  const [capacity, setCapacity] = useState("");
+  const [description, setDescription] = useState("Please help with tutoring !");
+  const [selectedTags, setSelectedTags] = useState([]);
+
   const [imagePreview, setImagePreview] = useState(placeholder);
-  const [imageFile, setImageFile] = useState(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const [imageDataUrl, setImageDataUrl] = useState("");
+
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setImageFile(file);
-      // Créer une URL de prévisualisation
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result;
+      setImagePreview(String(dataUrl));
+      setImageDataUrl(String(dataUrl));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const toggleTag = (tag) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const buildDateTime = (d, hhmm) => {
+    if (!d || !hhmm) return null;
+    const day = d.format("YYYY-MM-DD");
+    const time = `${hhmm}:00`;
+    return `${day}T${time}`;
   };
 
   const handleCreateActivity = async () => {
-    const formDataToSend = new FormData();
-    
-    // Ajouter les données du formulaire
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('place', formData.place);
-    formDataToSend.append('date', formData.date);
-    formDataToSend.append('startTime', formData.startTime);
-    formDataToSend.append('endTime', formData.endTime);
-    formDataToSend.append('description', formData.description);
-    
-    // Ajouter l'image si elle existe
-    if (imageFile) {
-      formDataToSend.append('image', imageFile);
+    const organizerId = Number(localStorage.getItem("userId"));
+    if (!organizerId) {
+      console.error("No organizerId in localStorage. Make sure you set userId after login/register.");
+      setSnackbar({ open: true, message: "Please sign in again.", severity: "error" });
+      return;
     }
-    
+
+    const startTime = buildDateTime(date, startTimeStr);
+    const endTime = buildDateTime(date, endTimeStr);
+
+    const payload = {
+      title,
+      description,
+      location,
+      imageUrl: imageDataUrl || "",
+      startTime,
+      endTime,
+      capacity: capacity ? Number(capacity) : null,
+      organizerId,
+      tags: selectedTags,
+    };
+
     try {
-      const response = await fetch('http://localhost:8080/api/activities', {
-        method: 'POST',
-        body: formDataToSend
+      const res = await fetch("http://localhost:8080/api/activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-      
-      if (!response.ok) throw new Error('Failed to create activity');
-      
-      setSnackbar({
-        open: true,
-        message: 'Activity created successfully!',
-        severity: 'success'
-      });
-      
-      // Rediriger après 1.5 secondes pour laisser le temps de voir le message
-      setTimeout(() => navigate('/viewActivities'), 1500);
-    } catch (error) {
-      console.error('Error creating activity:', error);
-      setSnackbar({
-        open: true,
-        message: 'Failed to create activity',
-        severity: 'error'
-      });
+
+      if (!res.ok) throw new Error("Failed to create activity");
+
+      setSnackbar({ open: true, message: "Activity created successfully!", severity: "success" });
+      setTimeout(() => navigate("/viewActivities"), 1200);
+    } catch (err) {
+      console.error(err);
+      setSnackbar({ open: true, message: "Failed to create activity", severity: "error" });
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+  const handleCloseSnackbar = () => setSnackbar(s => ({ ...s, open: false }));
 
   return (
     <ThemeProvider theme={theme}>
@@ -127,7 +132,7 @@ const CreateActivity = () => {
             name2="View activities" 
             name3="Create activity" 
             path1="/userProfile" 
-            path2="/ViewActivities" 
+            path2="/viewActivities" 
             path3="/createActivity" 
             current="third"
             inline={true}
@@ -139,7 +144,7 @@ const CreateActivity = () => {
           <div className="content-wrapper">
             {/* Image upload */}
             <div className="image-upload-container">
-              <img className="image-placeholder" src={imagePreview} alt="Activity preview"/>
+              <img className="image-placeholder" src={imagePreview} alt="Activity preview" />
               <input
                 accept="image/*"
                 style={{ display: 'none' }}
@@ -148,12 +153,7 @@ const CreateActivity = () => {
                 onChange={handleImageUpload}
               />
               <label htmlFor="image-upload-input">
-                <Button
-                  variant="contained"
-                  color="salmon"
-                  component="span"
-                  className="upload-button"
-                >
+                <Button variant="contained" color="salmon" component="span" className="upload-button">
                   Upload Image
                 </Button>
               </label>
@@ -167,7 +167,8 @@ const CreateActivity = () => {
                   fullWidth
                   variant="outlined"
                   placeholder="Tutoring help"
-                  defaultValue="Tutoring help"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 />
 
                 <TextField
@@ -175,17 +176,16 @@ const CreateActivity = () => {
                   fullWidth
                   variant="outlined"
                   placeholder="Bat 620"
-                  defaultValue="Bat 620"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                 />
 
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker 
+                  <DatePicker
                     label="Date"
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                      }
-                    }}
+                    value={date}
+                    onChange={(newValue) => setDate(newValue)}
+                    slotProps={{ textField: { fullWidth: true } }}
                   />
                 </LocalizationProvider>
 
@@ -194,7 +194,8 @@ const CreateActivity = () => {
                   fullWidth
                   variant="outlined"
                   type="time"
-                  defaultValue="16:00"
+                  value={startTimeStr}
+                  onChange={(e) => setStartTimeStr(e.target.value)}
                 />
 
                 <TextField
@@ -202,14 +203,25 @@ const CreateActivity = () => {
                   fullWidth
                   variant="outlined"
                   type="time"
-                  defaultValue="18:00"
+                  value={endTimeStr}
+                  onChange={(e) => setEndTimeStr(e.target.value)}
+                />
+
+                <TextField
+                  label="Capacity (optional)"
+                  fullWidth
+                  variant="outlined"
+                  type="number"
+                  value={capacity}
+                  onChange={(e) => setCapacity(e.target.value)}
                 />
 
                 <TextField
                   label="Description"
                   variant="outlined"
                   placeholder="Please help with tutoring !"
-                  defaultValue="Please help with tutoring !"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   fullWidth
                   multiline
                   rows={4}
@@ -220,36 +232,20 @@ const CreateActivity = () => {
             {/* Tags sidebar */}
             <div className="tags-container">
               <h2 className="tags-title">Tags :</h2>
-              
               <div className="filter-category">
-                  <FormControlLabel 
-                      control={<Checkbox color="salmon" defaultUnchecked />} 
-                      label="Study" 
+                {ALL_TAGS.map((tag) => (
+                  <FormControlLabel
+                    key={tag}
+                    control={
+                      <Checkbox
+                        color="salmon"
+                        checked={selectedTags.includes(tag)}
+                        onChange={() => toggleTag(tag)}
+                      />
+                    }
+                    label={tag}
                   />
-                  <FormControlLabel 
-                      control={<Checkbox color="salmon" defaultUnchecked />} 
-                      label="Party" 
-                  />
-                  <FormControlLabel 
-                      control={<Checkbox color="salmon" defaultUnchecked />} 
-                      label="Outing" 
-                  />
-                  <FormControlLabel 
-                      control={<Checkbox color="salmon" defaultUnchecked />} 
-                      label="Movie" 
-                  />
-                  <FormControlLabel 
-                      control={<Checkbox color="salmon" defaultUnchecked />} 
-                      label="Games" 
-                  />
-                  <FormControlLabel 
-                      control={<Checkbox color="salmon" defaultUnchecked />} 
-                      label="Sport" 
-                  />
-                  <FormControlLabel 
-                      control={<Checkbox color="salmon" defaultUnchecked />} 
-                      label="Cultural" 
-                  />
+                ))}
               </div>
             </div>
           </div>
@@ -257,8 +253,8 @@ const CreateActivity = () => {
 
         {/* Create button */}
         <div className="button-container">
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             color="salmon"
             className="create-button"
             onClick={handleCreateActivity}
@@ -268,18 +264,14 @@ const CreateActivity = () => {
         </div>
       </div>
 
-      {/* Snackbar pour les notifications */}
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

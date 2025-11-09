@@ -19,6 +19,8 @@ public class Activity {
 
     private String location;
 
+    @Column(name = "image_url", length = 1000)
+    private String imageUrl;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -29,7 +31,6 @@ public class Activity {
 
     private LocalDateTime createdAt;
 
-    // Relationships
     @ManyToOne
     @JoinColumn(name = "organizer_id")
     private User organizer;
@@ -48,14 +49,18 @@ public class Activity {
     @OneToOne(mappedBy = "activity")
     private Conversation conversation;
 
-    // NEW: list of user IDs who joined this activity
+    // participants as user IDs
     @ElementCollection
-    @CollectionTable(
-            name = "activity_participants",
-            joinColumns = @JoinColumn(name = "activity_id")
-    )
+    @CollectionTable(name = "activity_participants", joinColumns = @JoinColumn(name = "activity_id"))
     @Column(name = "user_id")
     private List<Integer> participantIds = new ArrayList<>();
+
+    // TAGS: set of enums, persisted as strings in a separate table
+    @ElementCollection(targetClass = Tag.class)
+    @CollectionTable(name = "activity_tags", joinColumns = @JoinColumn(name = "activity_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag")
+    private Set<Tag> tags = new HashSet<>();
 
     // Getters & Setters
     public Integer getId() { return id; }
@@ -69,6 +74,9 @@ public class Activity {
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
@@ -103,7 +111,9 @@ public class Activity {
     public List<Integer> getParticipantIds() { return participantIds; }
     public void setParticipantIds(List<Integer> participantIds) { this.participantIds = participantIds; }
 
-    // Convenience (optional)
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
+
     public void addParticipant(Integer userId) {
         if (userId == null) return;
         if (!this.participantIds.contains(userId)) {

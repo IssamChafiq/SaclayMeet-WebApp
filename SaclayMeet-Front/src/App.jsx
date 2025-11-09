@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+
 import Home from "./home/Home";
 import SignIn from "./signIn/SignIn";
 import Register from "./register/Register";
@@ -22,11 +23,22 @@ function App() {
       <Route path="/viewActivities" element={<ViewActivities />} />
       <Route path="/createActivity" element={<CreateActivity />} />
       <Route path="/userProfile" element={<UserProfile />} />
-      <Route path="/activityDetails" element={<ActivityDetails />} /> {/*J'ai l'impression qu'en lui passant l'id de la route, on peut lui faire aller sur une route spécifique : <Route path="/activityDetails/:id" element={<ActivityDetails />} />*/}
+
+      {/* Activity details (dynamic) */}
+      <Route path="/activity/:id" element={<ActivityDetails />} />
+      <Route path="/activityDetails/:id" element={<ActivityDetails />} />
+      <Route path="/activityDetails" element={<Navigate to="/viewActivities" replace />} />
+
       <Route path="/activitiesCreated" element={<ActivitiesCreated />} />
       <Route path="/upcomingActivities" element={<UpcomingActivities />} />
       <Route path="/profileView" element={<ProfileView />} />
-      <Route path="/groupChat" element={<GroupChat />} />
+
+      {/* Group chat (dynamic) */}
+      <Route path="/groupChat/:activityId" element={<GroupChat />} />
+      <Route path="/groupChat" element={<Navigate to="/viewActivities" replace />} />
+
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

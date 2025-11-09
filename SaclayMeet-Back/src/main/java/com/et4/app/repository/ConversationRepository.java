@@ -2,7 +2,9 @@ package com.et4.app.repository;
 
 import com.et4.app.model.Conversation;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-public class ConversationRepository {
+import java.util.Optional;
+
+public interface ConversationRepository extends JpaRepository<Conversation, Integer> {
+    Optional<Conversation> findByActivityId(Integer activityId);
 }

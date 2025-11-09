@@ -1,7 +1,7 @@
 package com.et4.app.model;
 
 import jakarta.persistence.*;
-import java.time.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "message")
@@ -20,11 +20,11 @@ public class Message {
     @JoinColumn(name = "conversation_id")
     private Conversation conversation;
 
-    @OneToOne
+    // FIX: a user can send many messages → ManyToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    // Getters & Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

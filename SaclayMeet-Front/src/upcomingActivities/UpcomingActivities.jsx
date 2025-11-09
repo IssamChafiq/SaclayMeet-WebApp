@@ -3,119 +3,136 @@ import "./UpcomingActivities.css";
 import ActivityCard from "../components/ActivityCard";
 import NavButtons from "../components/NavButtons";
 
-import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 
 let theme = createTheme({});
-
 theme = createTheme(theme, {
   palette: {
     salmon: theme.palette.augmentColor({
-      color: {
-        main: '#6E003C',
-      },
+      color: { main: '#6E003C' },
       name: 'salmon',
     }),
   },
 });
 
-const ViewActivities = () => {
-    const navigate = useNavigate();
-    const activities = [
-        {
-            id: 1,
-            title: "Title",
-            description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
-            tags: ["Tag", "Tag", "Tag"]
-        },
-        {
-            id: 2,
-            title: "Title",
-            description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
-            tags: ["Tag", "Tag", "Tag"]
-        },
-        {
-            id: 3,
-            title: "Title",
-            description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
-            tags: ["Tag", "Tag", "Tag"]
-        },
-    ];
+const UpcomingActivities = () => {
+  const navigate = useNavigate();
 
-    return (
-        <ThemeProvider theme={theme}>
-            <div className="view-activities">
-                <div className="header">
-                    <div className="logo-box">
-                        <img
-                            className="logo-saclay-meet"
-                            alt="Logo saclay meet"
-                            src={logoSaclayMeet1}
-                            onClick={() => navigate("/viewActivities")}
-                        />
-                    </div>
-                    
-                    <NavButtons
-                        name1="Profile" 
-                        name2="View activities" 
-                        name3="Create activity" 
-                        path1="/userProfile" 
-                        path2="/ViewActivities" 
-                        path3="/createActivity" 
-                        current="first"
-                        inline={true}
-                    />
-                </div>
+  const [activities, setActivities] = useState([]);
+  const [search, setSearch] = useState("");
 
-                <div className="search-container">
-                    <TextField
-                        placeholder="Search"
-                        variant="outlined"
-                        className="search-field"
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <SearchIcon />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                </div>
+  // Load activities the current user joined
+  useEffect(() => {
+    const uid = Number(localStorage.getItem("userId"));
+    if (!uid) return; // not logged in
 
-                <div className="content">
-                    <div className="sidebar">
-                        <NavButtons
-                            name1="Profile" 
-                            name2="Activities created" 
-                            name3="Upcoming activities" 
-                            path1="/userProfile" 
-                            path2="/activitiesCreated" 
-                            path3="/upcomingActivities" 
-                            current="third"
-                            inline={false}
-                        />
-                    </div>
-                    
+    fetch(`http://localhost:8080/api/activities/joined/${uid}`)
+      .then(res => res.json())
+      .then(data => Array.isArray(data) ? data : [])
+      .then(list => {
+        // never show past items; keep only startTime >= now
+        const now = new Date();
+        const upcoming = list.filter(a => a.startTime && new Date(a.startTime) >= now);
+        setActivities(upcoming);
+      });
+  }, []);
 
-                    <div className="activities-list">
-                        {activities.map((activity) => (
-                            <ActivityCard
-                                key={activity.id}
-                                title={activity.title}
-                                description={activity.description}
-                                tags={activity.tags}
-                                onClick={() => navigate("/activityDetails")}
-                            />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </ThemeProvider>
-    );
+  // client-side search
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return activities;
+    return activities.filter(a => {
+      const t = (a.title || "").toLowerCase();
+      const d = (a.description || "").toLowerCase();
+      return t.includes(q) || d.includes(q);
+    });
+  }, [activities, search]);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <div className="view-activities">
+        {/* Header */}
+        <div className="header">
+          <div className="logo-box">
+            <img
+              className="logo-saclay-meet"
+              alt="Logo saclay meet"
+              src={logoSaclayMeet1}
+              onClick={() => navigate("/viewActivities")}
+            />
+          </div>
+
+          <NavButtons
+            name1="Profile" 
+            name2="View activities" 
+            name3="Create activity" 
+            path1="/userProfile" 
+            path2="/viewActivities" 
+            path3="/createActivity" 
+            current="second"
+            inline={true}
+          />
+        </div>
+
+        {/* Search */}
+        <div className="search-container">
+          <TextField
+            placeholder="Search"
+            variant="outlined"
+            className="search-field"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </div>
+
+        <div className="content">
+          {/* Sidebar */}
+          <div className="sidebar">
+            <NavButtons
+              name1="Profile" 
+              name2="Activities created" 
+              name3="Upcoming activities" 
+              path1="/userProfile" 
+              path2="/activitiesCreated" 
+              path3="/upcomingActivities" 
+              current="third"
+              inline={false}
+            />
+          </div>
+
+          {/* Activities list */}
+          <div className="activities-list">
+            {filtered.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                title={activity.title}
+                description={activity.description}
+                tags={Array.isArray(activity.tags) ? activity.tags : []}
+                onClick={() => navigate(`/activity/${activity.id}`)}
+              />
+            ))}
+            {filtered.length === 0 && (
+              <div style={{ opacity: 0.7, padding: "1rem" }}>
+                No upcoming subscriptions found.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </ThemeProvider>
+  );
 };
 
-export default ViewActivities;
+export default UpcomingActivities;

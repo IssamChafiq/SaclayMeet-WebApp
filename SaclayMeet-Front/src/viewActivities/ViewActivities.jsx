@@ -1,167 +1,204 @@
-import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
-import "./ViewActivities.css";
-import ActivityCard from "../components/ActivityCard";
-import NavButtons from "../components/NavButtons";
+    import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
+    import "./ViewActivities.css";
+    import ActivityCard from "../components/ActivityCard";
+    import NavButtons from "../components/NavButtons";
 
-import TextField from '@mui/material/TextField';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import InputAdornment from '@mui/material/InputAdornment';
-import SearchIcon from '@mui/icons-material/Search';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { useNavigate } from "react-router-dom";
+    import TextField from '@mui/material/TextField';
+    import Checkbox from '@mui/material/Checkbox';
+    import FormControlLabel from '@mui/material/FormControlLabel';
+    import InputAdornment from '@mui/material/InputAdornment';
+    import SearchIcon from '@mui/icons-material/Search';
+    import { createTheme, ThemeProvider } from '@mui/material/styles';
+    import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+    import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+    import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+    import dayjs from "dayjs";
+    import { useNavigate } from "react-router-dom";
+    import { useEffect, useMemo, useState } from "react";
 
-let theme = createTheme({});
+    let theme = createTheme({});
+    theme = createTheme(theme, {
+    palette: {
+        salmon: theme.palette.augmentColor({
+        color: { main: '#6E003C' },
+        name: 'salmon',
+        }),
+    },
+    });
 
-theme = createTheme(theme, {
-  palette: {
-    salmon: theme.palette.augmentColor({
-      color: {
-        main: '#6E003C',
-      },
-      name: 'salmon',
-    }),
-  },
-});
+    // Must match backend enum Tag values exactly
+    const ALL_TAGS = ["Study", "Party", "Outing", "Movie", "Games", "Sport", "Cultural"];
 
-const ViewActivities = () => {
+    // helper: backend expects "YYYY-MM-DDTHH:mm:ss"
+    const toIsoSecs = (d) => (d ? dayjs(d).format("YYYY-MM-DD[T]HH:mm:ss") : null);
+
+    const ViewActivities = () => {
     const navigate = useNavigate();
-    const activities = [
-        {
-            id: 1,
-            title: "Title",
-            description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
-            tags: ["Tag", "Tag", "Tag"]
-        },
-        {
-            id: 2,
-            title: "Title",
-            description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
-            tags: ["Tag", "Tag", "Tag"]
-        },
-        {
-            id: 3,
-            title: "Title",
-            description: "Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
-            tags: ["Tag", "Tag", "Tag"]
-        },
-    ];
+
+    // filters
+    const [search, setSearch] = useState("");
+    const [selectedTags, setSelectedTags] = useState([]);   // ["Study", "Sport", ...]
+    const [afterDate, setAfterDate] = useState(null);       // dayjs | null
+    const [beforeDate, setBeforeDate] = useState(null);     // dayjs | null
+
+    // data
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // build URL & fetch whenever filters change
+    useEffect(() => {
+        const fetchActivities = async () => {
+        setLoading(true);
+
+        // Always exclude past activities:
+        // if user didn't pick "after", we use now
+        const effectiveAfter = afterDate ? toIsoSecs(afterDate.startOf("day")) : toIsoSecs(dayjs());
+
+        const params = new URLSearchParams();
+        params.set("after", effectiveAfter);
+        if (beforeDate) params.set("before", toIsoSecs(beforeDate.endOf("day")));
+        if (selectedTags.length) params.set("tags", selectedTags.join(","));
+
+        const res = await fetch(`http://localhost:8080/api/activities/search?${params.toString()}`);
+        const data = await res.json();
+        setActivities(Array.isArray(data) ? data : []);
+        setLoading(false);
+        };
+
+        fetchActivities();
+    }, [selectedTags, afterDate, beforeDate]);
+
+    // client-side search over title/description
+    const filtered = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return activities;
+        return activities.filter(a => {
+        const t = (a.title || "").toLowerCase();
+        const d = (a.description || "").toLowerCase();
+        return t.includes(q) || d.includes(q);
+        });
+    }, [activities, search]);
+
+    const toggleTag = (tag) => {
+        setSelectedTags(prev =>
+        prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+        );
+    };
 
     return (
         <ThemeProvider theme={theme}>
-            <div className="view-activities">
-                <div className="header">
-                    <div className="logo-box">
-                        <img
-                            className="logo-saclay-meet"
-                            alt="Logo saclay meet"
-                            src={logoSaclayMeet1}
-                            onClick={() => navigate("/viewActivities")}
+        <div className="view-activities">
+            {/* Header */}
+            <div className="header">
+            <div className="logo-box">
+                <img
+                className="logo-saclay-meet"
+                alt="Logo saclay meet"
+                src={logoSaclayMeet1}
+                onClick={() => navigate("/viewActivities")}
+                />
+            </div>
+            
+            <NavButtons
+                name1="Profile" 
+                name2="View Activities" 
+                name3="Create Activity" 
+                path1="/userProfile" 
+                path2="/viewActivities" 
+                path3="/createActivity" 
+                current="second"
+                inline={true}
+            />
+            </div>
+
+            {/* Search */}
+            <div className="search-container">
+            <TextField
+                placeholder="Search"
+                variant="outlined"
+                className="search-field"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                InputProps={{
+                endAdornment: (
+                    <InputAdornment position="end">
+                    <SearchIcon />
+                    </InputAdornment>
+                ),
+                }}
+            />
+            </div>
+
+            <div className="activities-content">
+            {/* Sidebar filters */}
+            <div className="sidebar">
+                <div className="filters-box">
+                <h3 className="filters-title">Filters :</h3>
+
+                <div className="filter-category">
+                    {ALL_TAGS.map(tag => (
+                    <FormControlLabel
+                        key={tag}
+                        control={
+                        <Checkbox
+                            color="salmon"
+                            checked={selectedTags.includes(tag)}
+                            onChange={() => toggleTag(tag)}
                         />
-                    </div>
-                    
-                    <NavButtons
-                        name1="Profile" 
-                        name2="View Activities" 
-                        name3="Create Activity" 
-                        path1="/userProfile" 
-                        path2="/viewActivities" 
-                        path3="/createActivity" 
-                        current="second"
-                        inline={true}
+                        }
+                        label={tag}
                     />
+                    ))}
                 </div>
 
-                <div className="search-container">
-                    <TextField
-                        placeholder="Search"
-                        variant="outlined"
-                        className="search-field"
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <SearchIcon />
-                                </InputAdornment>
-                            ),
-                        }}
+                <div className="date-filter">
+                    <p className="date-label">After</p>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                        label="Start date"
+                        value={afterDate}
+                        onChange={(d) => setAfterDate(d)}
                     />
+                    </LocalizationProvider>
                 </div>
 
-                <div className="activities-content">
-                    <div className="sidebar">
-                        <div className="filters-box">
-                            <h3 className="filters-title">Filters :</h3>
-
-                            <div className="filter-category">
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Study" 
-                                />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Party" 
-                                />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Outing" 
-                                />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Movie" 
-                                />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Games" 
-                                    />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Sport" 
-                                />
-                                <FormControlLabel 
-                                    control={<Checkbox color="salmon" defaultUnchecked />} 
-                                    label="Cultural" 
-                                />
-                            </div>
-
-                            <div className="date-filter">
-                                <p className="date-label">After</p>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
-                                    <DatePicker 
-                                        label="Start date"
-                                    />
-                                </LocalizationProvider>
-                            </div>
-
-                            <div className="date-filter">
-                                <p className="date-label">Before</p>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
-                                    <DatePicker 
-                                        label="End date"
-                                    />
-                                </LocalizationProvider>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="activities-list">
-                        {/* Pour naviguer vers une activité en particulier : onClick={() => navigate(`/activity/${activity.id}`)} */}
-                        {activities.map((activity) => (
-                            <ActivityCard
-                                key={activity.id}
-                                title={activity.title}
-                                description={activity.description}
-                                tags={activity.tags}
-                                onClick={() => navigate("/activityDetails")}
-                            />
-                        ))}
-                    </div>
+                <div className="date-filter">
+                    <p className="date-label">Before</p>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                        label="End date"
+                        value={beforeDate}
+                        onChange={(d) => setBeforeDate(d)}
+                    />
+                    </LocalizationProvider>
+                </div>
                 </div>
             </div>
+
+            {/* Activities list */}
+            <div className="activities-list">
+                {loading && <div style={{ opacity: 0.7, padding: "1rem" }}>Loading…</div>}
+
+                {!loading && filtered.map((activity) => (
+                <ActivityCard
+                    key={activity.id}
+                    title={activity.title}
+                    description={activity.description}
+                    tags={Array.isArray(activity.tags) ? activity.tags : []}
+                    onClick={() => navigate(`/activity/${activity.id}`)}
+                />
+                ))}
+
+                {!loading && filtered.length === 0 && (
+                <div style={{ opacity: 0.7, padding: "1rem" }}>
+                    No activities match your filters.
+                </div>
+                )}
+            </div>
+            </div>
+        </div>
         </ThemeProvider>
     );
-};
+    };
 
-export default ViewActivities;
+    export default ViewActivities;
