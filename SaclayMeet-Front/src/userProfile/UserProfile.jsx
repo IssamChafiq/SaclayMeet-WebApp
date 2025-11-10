@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import Badge from '@mui/material/Badge';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './UserProfile.css';
 import NavButtons from '../components/NavButtons';
@@ -47,6 +50,9 @@ function getAgeFromBirthDate(birthDateStr) {
 
 const UserProfile = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [profileImage, setProfileImage] = useState(null);
+  const [originalProfileImage, setOriginalProfileImage] = useState(null); // Nouvelle ligne
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
@@ -88,9 +94,16 @@ const UserProfile = () => {
           instagram: "empty for now",
           linkedin: "empty for now"
         });
+        // Sauvegarder l'image de profil originale si elle existe
+        if (data.profileImageUrl) {
+          setProfileImage(data.profileImageUrl);
+          // Pour pouvoir la récupérer si on annule les changements
+          setOriginalProfileImage(data.profileImageUrl);
+        }
       });
-  }, []); // [] = ne le faire qu'une seule fois au chargement
+  }, []);
 
+  // à rajouter : logique pour sauvegarder la photo de profil
   const handleSaveProfile = async () => {
     const userId = sessionStorage.getItem("userId");
     
@@ -106,6 +119,8 @@ const UserProfile = () => {
       const data = await response.json();
       sessionStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
       setIsEditing(false);
+      // Mettre à jour l'image originale après sauvegarde
+      setOriginalProfileImage(profileImage);
       setSnackbar({
         open: true,
         message: 'Profile updated successfully!',
@@ -123,6 +138,42 @@ const UserProfile = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Vérifier que c'est bien une image
+      if (!file.type.startsWith('image/')) {
+        setSnackbar({
+          open: true,
+          message: 'Please select an image file',
+          severity: 'error'
+        });
+        return;
+      }
+
+      // Créer une URL temporaire pour afficher l'image
+      const imageUrl = URL.createObjectURL(file);
+      setProfileImage(imageUrl);
+      setIsEditing(true);
+      
+      setSnackbar({
+        open: true,
+        message: 'Profile picture updated! Don\'t forget to save your changes.',
+        severity: 'success'
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    // Restaurer l'image originale
+    setProfileImage(originalProfileImage);
+    setIsEditing(false);
   };
 
   const handleDisconnect = () => {
@@ -177,11 +228,48 @@ const UserProfile = () => {
           <div className="profile-main">
             {/* Avatar section */}
             <div className="profile-header">
-              <Avatar
-                className="profile-avatar"
-                alt={`${profileData.firstName} ${profileData.lastName}`}
-                sx={{ width: 100, height: 100 }}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                style={{ display: 'none' }}
               />
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                badgeContent={
+                  <IconButton
+                    onClick={handleAvatarClick}
+                    sx={{
+                      bgcolor: '#6E003C',
+                      color: 'white',
+                      width: 32,
+                      height: 32,
+                      '&:hover': {
+                        bgcolor: '#8E004C',
+                      },
+                    }}
+                  >
+                    <PhotoCamera sx={{ fontSize: 18 }} />
+                  </IconButton>
+                }
+              >
+                <Avatar
+                  className="profile-avatar"
+                  alt={`${profileData.firstName} ${profileData.lastName}`}
+                  src={profileImage}
+                  sx={{ 
+                    width: 100, 
+                    height: 100,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      opacity: 0.8,
+                    },
+                  }}
+                  onClick={handleAvatarClick}
+                />
+              </Badge>
               <h1 className="profile-name">
                 {profileData.firstName} {profileData.lastName}
               </h1>
@@ -371,7 +459,7 @@ const UserProfile = () => {
                     color="salmon"
                     variant="outlined"
                     size="large"
-                    onClick={() => setIsEditing(false)}
+                    onClick={handleCancel}
                   >
                     Cancel
                   </Button>

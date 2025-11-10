@@ -84,6 +84,14 @@ const ActivityDetails = () => {
     if (res.ok) navigate("/viewActivities");
   };
 
+  const handleAuthorClick = () => {
+    if (currentUserId === organizer?.id) {
+      navigate("/userProfile");
+    } else {
+      navigate(`/profileView/${organizer?.id}`)
+    }
+  };
+
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
@@ -184,7 +192,7 @@ const ActivityDetails = () => {
                 <p
                   className="activity-author"
                   // inside ActivityDetails.jsx
-                  onClick={() => navigate(`/profileView/${organizer?.id}`)}
+                  onClick={handleAuthorClick}
                   style={{ cursor: "pointer" }}
                 >
                   By {authorName || "Unknown"}

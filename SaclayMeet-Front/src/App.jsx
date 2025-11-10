@@ -12,29 +12,103 @@ import ActivitiesCreated from "./activitiesCreated/ActivitiesCreated";
 import UpcomingActivities from "./upcomingActivities/UpcomingActivities";
 import ProfileView from "./profileView/ProfileView";
 import GroupChat from "./groupChat/GroupChat";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<Home />} />
       <Route path="/signIn" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/createProfile" element={<CreateProfile />} />
-      <Route path="/viewActivities" element={<ViewActivities />} />
-      <Route path="/createActivity" element={<CreateActivity />} />
-      <Route path="/userProfile" element={<UserProfile />} />
+
+      {/* Protected routes */}
+      <Route
+        path="/createProfile"
+        element={
+          <ProtectedRoute>
+            <CreateProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/viewActivities"
+        element={
+          <ProtectedRoute>
+            <ViewActivities />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/createActivity"
+        element={
+          <ProtectedRoute>
+            <CreateActivity />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/userProfile"
+        element={
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Activity details (dynamic) */}
-      <Route path="/activity/:id" element={<ActivityDetails />} />
-      <Route path="/activityDetails/:id" element={<ActivityDetails />} />
+      <Route
+        path="/activity/:id"
+        element={
+          <ProtectedRoute>
+            <ActivityDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/activityDetails/:id"
+        element={
+          <ProtectedRoute>
+            <ActivityDetails />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/activityDetails" element={<Navigate to="/viewActivities" replace />} />
 
-      <Route path="/activitiesCreated" element={<ActivitiesCreated />} />
-      <Route path="/upcomingActivities" element={<UpcomingActivities />} />
-      <Route path="/profileView/:userId" element={<ProfileView />} />
+      <Route
+        path="/activitiesCreated"
+        element={
+          <ProtectedRoute>
+            <ActivitiesCreated />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/upcomingActivities"
+        element={
+          <ProtectedRoute>
+            <UpcomingActivities />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profileView/:userId"
+        element={
+          <ProtectedRoute>
+            <ProfileView />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Group chat (dynamic) */}
-      <Route path="/groupChat/:activityId" element={<GroupChat />} />
+      <Route
+        path="/groupChat/:activityId"
+        element={
+          <ProtectedRoute>
+            <GroupChat />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/groupChat" element={<Navigate to="/viewActivities" replace />} />
 
       {/* Catch-all */}
