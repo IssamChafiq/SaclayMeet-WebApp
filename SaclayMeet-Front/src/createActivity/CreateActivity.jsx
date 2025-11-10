@@ -55,6 +55,7 @@
         setImagePreview(String(dataUrl));
         setImageDataUrl(String(dataUrl));
       };
+      // Lecture du fichier comme dataURL
       reader.readAsDataURL(file);
     };
 
