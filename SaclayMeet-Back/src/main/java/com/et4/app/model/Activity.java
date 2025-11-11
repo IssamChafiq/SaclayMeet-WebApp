@@ -20,7 +20,9 @@ public class Activity {
 
     private String location;
 
-    @Column(name = "image_url", length = 1000)
+    // Store big Base64 data-URLs safely
+    @Lob
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     private LocalDateTime startTime;

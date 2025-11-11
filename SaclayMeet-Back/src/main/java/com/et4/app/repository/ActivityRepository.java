@@ -13,10 +13,8 @@ import java.util.Optional;
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Integer> {
 
-    // all (admin-ish)
     List<Activity> findAllByOrderByCreatedAtDesc();
 
-    // visible feed (exclude canceled)
     List<Activity> findAllByStatusNotOrderByCreatedAtDesc(ActivityStatus status);
 
     List<Activity> findByOrganizer_Id(Integer organizerId);
