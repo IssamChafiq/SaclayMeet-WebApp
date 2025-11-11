@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Avatar from '@mui/material/Avatar';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import logoSaclayMeet1 from "../assets/Logo_Saclay-meet.png";
 import './UserProfile.css';
@@ -15,6 +14,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
+import ProfilePhoto from '../components/ProfilePhoto';
 
 let theme = createTheme({});
 theme = createTheme(theme, {
@@ -41,6 +41,7 @@ const UserProfile = () => {
   const navigate = useNavigate();
 
   const [profileData, setProfileData] = useState({
+    id: null,
     firstName: "",
     lastName: "",
     email: "",
@@ -52,7 +53,7 @@ const UserProfile = () => {
     snapchat: "",
     instagram: "",
     linkedin: "",
-    // profileImageUrl intentionally ignored for now
+    profileImageUrl: "", // data URL / http(s) / /api/images/..
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -65,19 +66,11 @@ const UserProfile = () => {
     fetch(`http://localhost:8080/api/users/${userId}`)
       .then(res => res.ok ? res.json() : Promise.reject(res))
       .then(data => {
-        setProfileData({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          birthDate: data.birthDate || "",
-          schoolName: data.schoolName || "",
-          level: data.level || "",
-          bio: data.bio || "",
-          facebook: data.facebook || "",
-          snapchat: data.snapchat || "",
-          instagram: data.instagram || "",
-          linkedin: data.linkedin || ""
-        });
+        setProfileData(prev => ({
+          ...prev,
+          ...data,
+          profileImageUrl: data.profileImageUrl || ""
+        }));
       })
       .catch(() => setSnackbar({ open: true, message: 'Failed to load profile', severity: 'error' }));
   }, []);
@@ -86,19 +79,19 @@ const UserProfile = () => {
     const userId = sessionStorage.getItem("userId");
     if (!userId) return;
 
-    // build payload WITHOUT image fields
     const payload = {
       firstName: profileData.firstName,
       lastName: profileData.lastName,
       email: profileData.email,
-      birthDate: profileData.birthDate || "", // allow clearing
+      birthDate: profileData.birthDate || "",
       schoolName: profileData.schoolName,
       level: profileData.level,
       bio: profileData.bio,
       facebook: profileData.facebook,
       instagram: profileData.instagram,
       snapchat: profileData.snapchat,
-      linkedin: profileData.linkedin
+      linkedin: profileData.linkedin,
+      profileImageUrl: profileData.profileImageUrl || "", // key: send image string
     };
 
     try {
@@ -113,13 +106,17 @@ const UserProfile = () => {
         try {
           const t = await res.text();
           if (t) msg = t;
-        } catch (_) {}
+        } catch {}
         throw new Error(msg);
       }
 
       const data = await res.json();
       sessionStorage.setItem("userName", `${data.firstName || ""} ${data.lastName || ""}`.trim());
-      setProfileData(prev => ({ ...prev, ...data }));
+      setProfileData(prev => ({
+        ...prev,
+        ...data,
+        profileImageUrl: data.profileImageUrl || ""
+      }));
       setIsEditing(false);
       setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
     } catch (err) {
@@ -136,6 +133,8 @@ const UserProfile = () => {
   };
 
   const age = getAgeFromBirthDate(profileData.birthDate);
+  const initials =
+    `${(profileData.firstName || "?")[0] || ""}${(profileData.lastName || "")[0] || ""}`.toUpperCase();
 
   return (
     <ThemeProvider theme={theme}>
@@ -175,12 +174,15 @@ const UserProfile = () => {
 
           <div className="profile-main">
             <div className="profile-header">
-              {/* Static avatar for now; image is out of scope */}
-              <Avatar
-                className="profile-avatar"
-                alt={`${profileData.firstName} ${profileData.lastName}`}
-                sx={{ width: 100, height: 100 }}
+              {/* Drop-in reusable photo picker/display (mirrors activity behavior) */}
+              <ProfilePhoto
+                value={profileData.profileImageUrl}
+                onChange={(val) => setProfileData(prev => ({ ...prev, profileImageUrl: val || "" }))}
+                editable={isEditing}
+                size={110}
+                initials={initials}
               />
+
               <h1 className="profile-name">{profileData.firstName} {profileData.lastName}</h1>
               <p className="profile-email">{profileData.email}</p>
             </div>
@@ -246,7 +248,7 @@ const UserProfile = () => {
                   disabled={!isEditing} />
               </div>
 
-              {/* Social links */}
+              {/* Socials kept as requested */}
               <div className="social-section">
                 <div className="social-row">
                   <div className="social-field">

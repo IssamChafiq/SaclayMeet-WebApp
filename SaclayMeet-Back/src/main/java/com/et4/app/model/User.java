@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "users") // keep your existing table name
+@Table(name = "users")
 public class User {
 
     @Id
@@ -35,16 +35,15 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    // Optional simple URL for avatars (you can keep using this)
-    @Column(name = "profile_image_url", length = 1000)
+    // IMPORTANT: allow huge data URLs
+    @Column(name = "profile_image_url", columnDefinition = "TEXT")
     private String profileImageUrl;
 
-    // ---- RESTORE THIS: owner side of the 1–1 expected by Image.user(mappedBy="image")
+    // optional: keep relation but unused for this feature
     @OneToOne
-    @JoinColumn(name = "image_id") // nullable is fine
+    @JoinColumn(name = "image_id")
     private Image image;
 
-    // ---- Socials (nullable)
     @Column(length = 255)
     private String facebook;
 
@@ -59,7 +58,6 @@ public class User {
 
     public User() {}
 
-    // ===== Getters / Setters =====
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

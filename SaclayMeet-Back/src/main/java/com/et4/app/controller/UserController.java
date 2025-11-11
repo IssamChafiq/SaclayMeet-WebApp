@@ -19,7 +19,6 @@ public class UserController {
         this.users = users;
     }
 
-    // DTO (no password)
     public record UserDTO(Integer id, String email, String firstName, String lastName,
                           String birthDate, String schoolName, String level, String bio,
                           String facebook, String instagram, String snapchat, String linkedin,
@@ -43,7 +42,6 @@ public class UserController {
         );
     }
 
-    // ---------- REGISTER ----------
     public record RegisterRequest(String email, String password, String firstName, String lastName) {}
 
     @PostMapping("/register")
@@ -51,25 +49,22 @@ public class UserController {
         if (req == null || req.email() == null || req.password() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
         }
-        String email = req.email().trim().toLowerCase();                // FIX: normalize
+        String email = req.email().trim().toLowerCase();
         if (email.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
         }
-        if (users.existsByEmailIgnoreCase(email)) {                      // FIX: case-insensitive check
+        if (users.existsByEmailIgnoreCase(email)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email déjà utilisé");
         }
         User u = new User();
-        u.setEmail(email);                                               // FIX: store normalized email
-        u.setPassword(req.password()); // (no hashing, keeping your current behavior)
+        u.setEmail(email);
+        u.setPassword(req.password());
         u.setFirstName(req.firstName());
         u.setLastName(req.lastName());
         User saved = users.save(u);
-
-        // FIX: return a consistent DTO so FE can pull names if needed
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(saved));
     }
 
-    // ---------- LOGIN ----------
     public record LoginRequest(String email, String password) {}
 
     @PostMapping("/login")
@@ -77,15 +72,14 @@ public class UserController {
         if (req == null || req.email() == null || req.password() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
         }
-        String email = req.email().trim().toLowerCase();                 // FIX: normalize
-        Optional<User> opt = users.findByEmailIgnoreCase(email);         // FIX: case-insensitive lookup
+        String email = req.email().trim().toLowerCase();
+        Optional<User> opt = users.findByEmailIgnoreCase(email);
         if (opt.isEmpty() || !opt.get().getPassword().equals(req.password())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect");
         }
-        return ResponseEntity.ok(toDTO(opt.get()));                      // FIX: return DTO (not Map)
+        return ResponseEntity.ok(toDTO(opt.get()));
     }
 
-    // ---------- READ ----------
     @GetMapping("/{id}")
     public ResponseEntity<?> getOne(@PathVariable Integer id) {
         return users.findById(id)
@@ -93,7 +87,6 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé"));
     }
 
-    // ---------- UPDATE ----------
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         Optional<User> opt = users.findById(id);
@@ -102,28 +95,47 @@ public class UserController {
 
         if (body.containsKey("firstName")) u.setFirstName((String) body.get("firstName"));
         if (body.containsKey("lastName"))  u.setLastName((String) body.get("lastName"));
+
         if (body.containsKey("email")) {
             String newEmail = (String) body.get("email");
-            if (newEmail != null) newEmail = newEmail.trim().toLowerCase();   // FIX: normalize on update too
+            if (newEmail != null) newEmail = newEmail.trim().toLowerCase();
             if (newEmail != null && !newEmail.equals(u.getEmail()) && users.existsByEmailIgnoreCase(newEmail)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Email déjà utilisé");
             }
             u.setEmail(newEmail);
         }
+
         if (body.containsKey("schoolName")) u.setSchoolName((String) body.get("schoolName"));
         if (body.containsKey("level"))      u.setLevel((String) body.get("level"));
         if (body.containsKey("bio"))        u.setBio((String) body.get("bio"));
+
         if (body.containsKey("facebook"))   u.setFacebook((String) body.get("facebook"));
         if (body.containsKey("instagram"))  u.setInstagram((String) body.get("instagram"));
         if (body.containsKey("snapchat"))   u.setSnapchat((String) body.get("snapchat"));
         if (body.containsKey("linkedin"))   u.setLinkedin((String) body.get("linkedin"));
+
+        // Accept big data URLs or http(s) like we do for activities
+        if (body.containsKey("profileImageUrl")) {
+            String v = (String) body.get("profileImageUrl");
+            if (v == null || v.isBlank()) {
+                u.setProfileImageUrl(null);
+            } else {
+                String s = v.trim();
+                if (s.startsWith("data:image/") || s.startsWith("http://") || s.startsWith("https://") || s.startsWith("/api/images")) {
+                    u.setProfileImageUrl(s);
+                } else {
+                    // if someone passes junk, just drop it instead of breaking
+                    u.setProfileImageUrl(null);
+                }
+            }
+        }
 
         if (body.containsKey("birthDate")) {
             String bd = (String) body.get("birthDate");
             if (bd == null || bd.isBlank()) {
                 u.setBirthDate(null);
             } else {
-                u.setBirthDate(LocalDate.parse(bd)); // expect YYYY-MM-DD
+                u.setBirthDate(LocalDate.parse(bd));
             }
         }
 
