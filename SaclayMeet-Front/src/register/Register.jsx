@@ -36,23 +36,21 @@ const Register = () => {
   const handleSubmit = async () => {
     // Vérification basique des champs
     const newErrors = {
-        email: email.trim() === "" ? "L'email est requis" : "", // On vérifie si l'email est vide
-        password: password.trim() === "" ? "Le mot de passe est requis" : "", // idem mais pour le mdp
-        confirmPassword:
-            confirmPassword.trim() === "" ? "Veuillez confirmer votre mot de passe" :
-            // On vérifie si le mdp est le même que celui du champ de confirmation
-            (password !== confirmPassword ? "Les mots de passe ne correspondent pas" : "")
+      email: email.trim() === "" ? "L'email est requis" : "",
+      password: password.trim() === "" ? "Le mot de passe est requis" : "",
+      confirmPassword:
+        confirmPassword.trim() === ""
+          ? "Veuillez confirmer votre mot de passe"
+          : (password !== confirmPassword ? "Les mots de passe ne correspondent pas" : "")
     };
 
-    // Met à jour les erreurs dans l’état React
     setErrors(newErrors);
 
-    // Si tout est bon (aucune erreur) → on envoie au backend
     if (!newErrors.email && !newErrors.password && !newErrors.confirmPassword) {
       try {
         // a) Préparer les données à envoyer
         const userData = {
-          email: email,
+          email: email,        // backend normalizes case
           password: password,
         };
 
@@ -62,20 +60,21 @@ const Register = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(userData), // Convertit l’objet JS en JSON
+          body: JSON.stringify(userData),
         });
 
         // c) Vérifie la réponse du backend
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json(); // DTO from backend
 
-          // Sauvegarde l’ID de l’utilisateur dans sessionStorage
+          // Sauvegarde l’ID de l’utilisateur + infos utiles dans sessionStorage
           sessionStorage.setItem("userId", data.id);
+          sessionStorage.setItem("userEmail", data.email || email);
+          sessionStorage.setItem("userName", `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim());
 
           // Passe à la page suivante
           navigate("/createProfile");
         } else if (response.status === 409) {
-          // 409 = Conflit → email déjà utilisé
           setErrors({
             ...newErrors,
             email: "Cet email est déjà utilisé",
@@ -169,4 +168,3 @@ const Register = () => {
 };
 
 export default Register;
-

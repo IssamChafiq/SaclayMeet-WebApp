@@ -16,20 +16,17 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:5173")
 public class ActivityController {
 
-    @Autowired
-    private ActivityRepository activityRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private ActivityRepository activityRepository;
+    @Autowired private UserRepository userRepository;
 
     // DTOs
     public static class CreateActivityRequest {
         public String title;
         public String description;
         public String location;
-        public String imageUrl;
-        public String startTime; // "YYYY-MM-DDTHH:mm:ss"
-        public String endTime;   // "YYYY-MM-DDTHH:mm:ss"
+        public String imageUrl;   // now we store as-is (remote URL or data URL)
+        public String startTime;  // "YYYY-MM-DDTHH:mm:ss"
+        public String endTime;    // "YYYY-MM-DDTHH:mm:ss"
         public Integer capacity;
         public Integer organizerId;
         public List<String> tags; // e.g. ["Study","Sport"]
@@ -39,17 +36,15 @@ public class ActivityController {
         public String title;
         public String description;
         public String location;
-        public String imageUrl;
+        public String imageUrl;   // store as-is
         public String startTime;
         public String endTime;
         public Integer capacity;
-        public String status; // POSTED | EXPIRED | CANCELED
+        public String status;     // POSTED | EXPIRED | CANCELED
         public List<String> tags;
     }
 
-    public static class JoinRequest {
-        public Integer userId;
-    }
+    public static class JoinRequest { public Integer userId; }
 
     private Set<Tag> toTagSet(List<String> raw) {
         if (raw == null) return new HashSet<>();
@@ -57,13 +52,16 @@ public class ActivityController {
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .map(Tag::valueOf) // relies on exact enum names
+                .map(Tag::valueOf)
                 .collect(Collectors.toSet());
     }
 
     // CREATE -> default POSTED
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateActivityRequest req) {
+        if (req == null || req.organizerId == null) {
+            return ResponseEntity.badRequest().body("Missing organizerId");
+        }
         Optional<User> organizerOpt = userRepository.findById(req.organizerId);
         if (organizerOpt.isEmpty()) return ResponseEntity.badRequest().body("Organizer not found");
 
@@ -71,7 +69,7 @@ public class ActivityController {
         a.setTitle(req.title);
         a.setDescription(req.description);
         a.setLocation(req.location);
-        a.setImageUrl(req.imageUrl);
+        a.setImageUrl(req.imageUrl); // store whatever string you send
         a.setCapacity(req.capacity);
         a.setOrganizer(organizerOpt.get());
         a.setCreatedAt(LocalDateTime.now());
@@ -88,7 +86,7 @@ public class ActivityController {
         return ResponseEntity.ok(saved);
     }
 
-    // UPDATE (allows changing status, e.g., EXPIRED)
+    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody UpdateActivityRequest req) {
         Optional<Activity> opt = activityRepository.findById(id);
@@ -99,7 +97,7 @@ public class ActivityController {
         if (req.title != null) a.setTitle(req.title);
         if (req.description != null) a.setDescription(req.description);
         if (req.location != null) a.setLocation(req.location);
-        if (req.imageUrl != null) a.setImageUrl(req.imageUrl);
+        if (req.imageUrl != null) a.setImageUrl(req.imageUrl); // set as-is
         if (req.capacity != null) a.setCapacity(req.capacity);
 
         if (req.startTime != null && !req.startTime.isBlank())
@@ -110,8 +108,7 @@ public class ActivityController {
         if (req.status != null && !req.status.isBlank())
             a.setStatus(Enum.valueOf(ActivityStatus.class, req.status));
 
-        if (req.tags != null)
-            a.setTags(toTagSet(req.tags));
+        if (req.tags != null) a.setTags(toTagSet(req.tags));
 
         Activity saved = activityRepository.save(a);
         return ResponseEntity.ok(saved);
@@ -138,7 +135,7 @@ public class ActivityController {
         return activityRepository.findAllByStatusNotOrderByCreatedAtDesc(ActivityStatus.CANCELED);
     }
 
-    // GET ONE (can return canceled; front decides how to render)
+    // GET ONE
     @GetMapping("/{id}")
     public ResponseEntity<?> getOne(@PathVariable Integer id) {
         return activityRepository.findById(id)
@@ -151,38 +148,36 @@ public class ActivityController {
     public ResponseEntity<?> join(@PathVariable Integer activityId, @RequestBody JoinRequest req) {
         Optional<Activity> opt = activityRepository.findById(activityId);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
-
         Activity a = opt.get();
         a.addParticipant(req.userId);
         Activity saved = activityRepository.save(a);
         return ResponseEntity.ok(saved);
     }
 
-    // LEAVE (missing before but used by front)
+    // LEAVE
     @PostMapping("/{activityId}/leave")
     public ResponseEntity<?> leave(@PathVariable Integer activityId, @RequestBody JoinRequest req) {
         Optional<Activity> opt = activityRepository.findById(activityId);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
-
         Activity a = opt.get();
         a.removeParticipant(req.userId);
         Activity saved = activityRepository.save(a);
         return ResponseEntity.ok(saved);
     }
 
-    // LIST JOINED BY USER (can include canceled; front will show placeholder)
+    // LIST JOINED BY USER
     @GetMapping("/joined/{userId}")
     public List<Activity> listJoinedByUser(@PathVariable Integer userId) {
         return activityRepository.findByParticipantIdsContains(userId);
     }
 
-    // LIST BY ORGANIZER (organizer should see their canceled too)
+    // LIST BY ORGANIZER
     @GetMapping("/organizer/{organizerId}")
     public List<Activity> listByOrganizer(@PathVariable Integer organizerId) {
         return activityRepository.findByOrganizer_Id(organizerId);
     }
 
-    // SEARCH (feed) -> exclude CANCELED, then apply filters
+    // SEARCH
     @GetMapping("/search")
     public List<Activity> search(
             @RequestParam(required = false) String tags,
@@ -191,7 +186,6 @@ public class ActivityController {
     ) {
         List<Activity> base = activityRepository.findAllByStatusNotOrderByCreatedAtDesc(ActivityStatus.CANCELED);
 
-        // filter by tags (ANY)
         if (tags != null && !tags.isBlank()) {
             Set<Tag> wanted = Arrays.stream(tags.split(","))
                     .map(String::trim)
@@ -210,7 +204,6 @@ public class ActivityController {
                     .collect(Collectors.toList());
         }
 
-        // date range
         LocalDateTime afterDt = (after != null && !after.isBlank()) ? LocalDateTime.parse(after) : null;
         LocalDateTime beforeDt = (before != null && !before.isBlank()) ? LocalDateTime.parse(before) : null;
 

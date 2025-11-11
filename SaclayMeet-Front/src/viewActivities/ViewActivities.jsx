@@ -60,7 +60,6 @@ const ViewActivities = () => {
 
       const res = await fetch(`http://localhost:8080/api/activities/search?${params.toString()}`);
       const data = await res.json();
-      // server already excludes CANCELED, but double-guard here
       const visible = (Array.isArray(data) ? data : []).filter(a => a.status !== "CANCELED");
       setActivities(visible);
       setLoading(false);
@@ -183,6 +182,7 @@ const ViewActivities = () => {
             {!loading && filtered.map((activity) => (
               <ActivityCard
                 key={activity.id}
+                image={activity.imageUrl}              
                 title={activity.title}
                 description={activity.description}
                 tags={Array.isArray(activity.tags) ? activity.tags : []}

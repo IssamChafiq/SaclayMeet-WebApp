@@ -20,7 +20,8 @@ public class Activity {
 
     private String location;
 
-    @Column(name = "image_url", length = 1000)
+    // TEXT so we can store long data: URLs or data:image;base64,...
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     private LocalDateTime startTime;
@@ -40,9 +41,7 @@ public class Activity {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToOne
-    @JoinColumn(name = "image_id")
-    private Image image;
+    // Removed: any @OneToOne Image mapping — not storing blobs anymore.
 
     @OneToMany(mappedBy = "activity")
     private List<Registration> registrations = new ArrayList<>();
@@ -65,9 +64,10 @@ public class Activity {
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
-        if (status == null) status = ActivityStatus.POSTED; // default
+        if (status == null) status = ActivityStatus.POSTED;
     }
 
+    // ===== getters/setters =====
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -104,9 +104,6 @@ public class Activity {
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
 
-    public Image getImage() { return image; }
-    public void setImage(Image image) { this.image = image; }
-
     public List<Registration> getRegistrations() { return registrations; }
     public void setRegistrations(List<Registration> registrations) { this.registrations = registrations; }
 
@@ -121,9 +118,7 @@ public class Activity {
 
     public void addParticipant(Integer userId) {
         if (userId == null) return;
-        if (!this.participantIds.contains(userId)) {
-            this.participantIds.add(userId);
-        }
+        if (!this.participantIds.contains(userId)) this.participantIds.add(userId);
     }
 
     public void removeParticipant(Integer userId) {

@@ -29,7 +29,7 @@ const UpcomingActivities = () => {
   // Load activities the current user joined
   useEffect(() => {
     const uid = Number(sessionStorage.getItem("userId"));
-    if (!uid) return; // not logged in
+    if (!uid) return;
 
     fetch(`http://localhost:8080/api/activities/joined/${uid}`)
       .then(res => res.json())
@@ -121,6 +121,7 @@ const UpcomingActivities = () => {
               return (
                 <ActivityCard
                   key={activity.id}
+                  image={activity.imageUrl}          
                   title={title}
                   description={description}
                   tags={tags}

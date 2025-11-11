@@ -110,6 +110,7 @@ const ActivitiesCreated = () => {
               return (
                 <ActivityCard
                   key={activity.id}
+                  image={activity.imageUrl}            
                   title={title}
                   description={activity.description}
                   tags={Array.isArray(activity.tags) ? activity.tags : []}

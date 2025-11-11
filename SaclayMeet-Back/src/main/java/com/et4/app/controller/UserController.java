@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:5173") // adapt if your FE origin differs
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
     private final UserRepository users;
 
@@ -19,7 +19,7 @@ public class UserController {
         this.users = users;
     }
 
-    // --- DTOs to avoid leaking password ---
+    // DTO (no password)
     public record UserDTO(Integer id, String email, String firstName, String lastName,
                           String birthDate, String schoolName, String level, String bio,
                           String facebook, String instagram, String snapchat, String linkedin,
@@ -51,17 +51,22 @@ public class UserController {
         if (req == null || req.email() == null || req.password() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
         }
-        if (users.existsByEmail(req.email())) {
+        String email = req.email().trim().toLowerCase();                // FIX: normalize
+        if (email.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
+        }
+        if (users.existsByEmailIgnoreCase(email)) {                      // FIX: case-insensitive check
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email déjà utilisé");
         }
         User u = new User();
-        u.setEmail(req.email());
-        u.setPassword(req.password()); // no hashing here because your FE expects simple behavior
+        u.setEmail(email);                                               // FIX: store normalized email
+        u.setPassword(req.password()); // (no hashing, keeping your current behavior)
         u.setFirstName(req.firstName());
         u.setLastName(req.lastName());
         User saved = users.save(u);
-        // FE expects {id, email}
-        return ResponseEntity.ok(Map.of("id", saved.getId(), "email", saved.getEmail()));
+
+        // FIX: return a consistent DTO so FE can pull names if needed
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(saved));
     }
 
     // ---------- LOGIN ----------
@@ -72,12 +77,12 @@ public class UserController {
         if (req == null || req.email() == null || req.password() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
         }
-        Optional<User> opt = users.findByEmail(req.email());
+        String email = req.email().trim().toLowerCase();                 // FIX: normalize
+        Optional<User> opt = users.findByEmailIgnoreCase(email);         // FIX: case-insensitive lookup
         if (opt.isEmpty() || !opt.get().getPassword().equals(req.password())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect");
         }
-        User u = opt.get();
-        return ResponseEntity.ok(Map.of("id", u.getId(), "email", u.getEmail()));
+        return ResponseEntity.ok(toDTO(opt.get()));                      // FIX: return DTO (not Map)
     }
 
     // ---------- READ ----------
@@ -88,19 +93,19 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé"));
     }
 
-    // ---------- UPDATE (no image required) ----------
+    // ---------- UPDATE ----------
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         Optional<User> opt = users.findById(id);
         if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
         User u = opt.get();
 
-        // apply only when key present (null means no change)
         if (body.containsKey("firstName")) u.setFirstName((String) body.get("firstName"));
         if (body.containsKey("lastName"))  u.setLastName((String) body.get("lastName"));
         if (body.containsKey("email")) {
             String newEmail = (String) body.get("email");
-            if (newEmail != null && !newEmail.equals(u.getEmail()) && users.existsByEmail(newEmail)) {
+            if (newEmail != null) newEmail = newEmail.trim().toLowerCase();   // FIX: normalize on update too
+            if (newEmail != null && !newEmail.equals(u.getEmail()) && users.existsByEmailIgnoreCase(newEmail)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Email déjà utilisé");
             }
             u.setEmail(newEmail);
@@ -121,8 +126,6 @@ public class UserController {
                 u.setBirthDate(LocalDate.parse(bd)); // expect YYYY-MM-DD
             }
         }
-
-        // ignore any image fields for now
 
         User saved = users.save(u);
         return ResponseEntity.ok(toDTO(saved));

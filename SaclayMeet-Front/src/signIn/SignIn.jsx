@@ -61,12 +61,13 @@ const SignIn = () => {
 
         // c) Vérifier la réponse du backend
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json(); // DTO {id,email,firstName,lastName,...}
 
-          // Connexion réussie : on sauvegarde l'ID utilisateur et son nom d'utilisateur (prenom + nom).
+          // Connexion réussie : on sauvegarde les infos utiles
           sessionStorage.setItem("userId", data.id);
-          sessionStorage.setItem("userName", `${data.firstName} ${data.lastName}`);
-          
+          sessionStorage.setItem("userEmail", data.email || email);
+          sessionStorage.setItem("userName", `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim());
+
           // Rediriger vers la page d'activités
           navigate("/viewActivities");
         } else if (response.status === 401) {
@@ -155,4 +156,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-
