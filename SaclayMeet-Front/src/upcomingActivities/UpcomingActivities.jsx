@@ -35,7 +35,6 @@ const UpcomingActivities = () => {
       .then(res => res.json())
       .then(data => Array.isArray(data) ? data : [])
       .then(list => {
-        // never show past items; keep only startTime >= now
         const now = new Date();
         const upcoming = list.filter(a => a.startTime && new Date(a.startTime) >= now);
         setActivities(upcoming);
@@ -114,15 +113,21 @@ const UpcomingActivities = () => {
 
           {/* Activities list */}
           <div className="activities-list">
-            {filtered.map((activity) => (
-              <ActivityCard
-                key={activity.id}
-                title={activity.title}
-                description={activity.description}
-                tags={Array.isArray(activity.tags) ? activity.tags : []}
-                onClick={() => navigate(`/activity/${activity.id}`)}
-              />
-            ))}
+            {filtered.map((activity) => {
+              const isCanceled = activity.status === "CANCELED";
+              const title = isCanceled ? "This activity has been canceled" : (activity.title || "");
+              const description = isCanceled ? "" : (activity.description || "");
+              const tags = isCanceled ? [] : (Array.isArray(activity.tags) ? activity.tags : []);
+              return (
+                <ActivityCard
+                  key={activity.id}
+                  title={title}
+                  description={description}
+                  tags={tags}
+                  onClick={() => navigate(`/activity/${activity.id}`)}
+                />
+              );
+            })}
             {filtered.length === 0 && (
               <div style={{ opacity: 0.7, padding: "1rem" }}>
                 No upcoming subscriptions found.

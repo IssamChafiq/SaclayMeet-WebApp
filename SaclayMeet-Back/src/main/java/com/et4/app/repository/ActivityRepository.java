@@ -1,6 +1,7 @@
 package com.et4.app.repository;
 
 import com.et4.app.model.Activity;
+import com.et4.app.model.ActivityStatus;
 import com.et4.app.model.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,13 +13,16 @@ import java.util.Optional;
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Integer> {
 
+    // all (admin-ish)
     List<Activity> findAllByOrderByCreatedAtDesc();
+
+    // visible feed (exclude canceled)
+    List<Activity> findAllByStatusNotOrderByCreatedAtDesc(ActivityStatus status);
 
     List<Activity> findByOrganizer_Id(Integer organizerId);
 
     List<Activity> findByParticipantIdsContains(Integer userId);
 
-    // Date helpers if you need them directly
     List<Activity> findByStartTimeAfter(LocalDateTime after);
     List<Activity> findByStartTimeBefore(LocalDateTime before);
     List<Activity> findByStartTimeBetween(LocalDateTime after, LocalDateTime before);
@@ -26,6 +30,5 @@ public interface ActivityRepository extends JpaRepository<Activity, Integer> {
     @Override
     Optional<Activity> findById(Integer id);
 
-    // “Any of these tags” match (JPA will join the element collection)
     List<Activity> findByTagsIn(List<Tag> tags);
 }

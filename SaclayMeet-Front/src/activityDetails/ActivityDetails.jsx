@@ -78,13 +78,15 @@ const ActivityDetails = () => {
     reload();
   };
 
+  // Soft delete -> cancel
   const handleDelete = async () => {
-    if (!confirm("Delete this activity?")) return;
+    if (!confirm("Cancel this activity?")) return;
     const res = await fetch(`http://localhost:8080/api/activities/${id}`, { method: "DELETE" });
-    if (res.ok) navigate("/viewActivities");
+    if (res.ok) reload(); // stay; list pages will hide it
   };
 
   const handleAuthorClick = () => {
+    const organizer = activity?.organizer;
     if (currentUserId === organizer?.id) {
       navigate("/userProfile");
     } else {
@@ -134,6 +136,7 @@ const ActivityDetails = () => {
     );
   }
 
+  const isCanceled = activity.status === "CANCELED";
   const {
     title,
     startTime,
@@ -152,6 +155,9 @@ const ActivityDetails = () => {
   const authorName = organizer ? `${organizer.firstName || ""} ${organizer.lastName || ""}`.trim() : "Unknown";
 
   const cover = imageUrl || image?.url || null;
+
+  // Render variants
+  const showPlaceholderForSubscriber = isCanceled && userType !== "owner";
 
   return (
     <ThemeProvider theme={theme}>
@@ -178,7 +184,7 @@ const ActivityDetails = () => {
               <div
                 className="activity-image"
                 style={{
-                  backgroundImage: cover ? `url(${cover})` : "none",
+                  backgroundImage: cover && !showPlaceholderForSubscriber ? `url(${cover})` : "none",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
@@ -186,30 +192,38 @@ const ActivityDetails = () => {
 
               {/* Info */}
               <div className="activity-info">
-                <h1 className="activity-title">{title}</h1>
-                <p className="activity-date">{dateLine}</p>
-                <p className="activity-place">{location}</p>
-                <p
-                  className="activity-author"
-                  // inside ActivityDetails.jsx
-                  onClick={handleAuthorClick}
-                  style={{ cursor: "pointer" }}
-                >
-                  By {authorName || "Unknown"}
-                </p>
+                <h1 className="activity-title">
+                  {showPlaceholderForSubscriber
+                    ? "This activity has been canceled"
+                    : (isCanceled ? `(CANCELED) ${title || ""}` : (title || ""))}
+                </h1>
 
-                <div className="activity-tags">
-                  {(Array.isArray(tags) ? tags : []).map((tag, i) => (
-                    <Chip
-                      key={i}
-                      label={tag}
-                      className="tag-chip"
-                      style={{ backgroundColor: '#6E003C', color: '#fff', fontFamily: 'Roboto, Helvetica', fontWeight: 500 }}
-                    />
-                  ))}
-                </div>
+                {!showPlaceholderForSubscriber && (
+                  <>
+                    <p className="activity-date">{dateLine}</p>
+                    <p className="activity-place">{location}</p>
+                    <p
+                      className="activity-author"
+                      onClick={handleAuthorClick}
+                      style={{ cursor: "pointer" }}
+                    >
+                      By {authorName || "Unknown"}
+                    </p>
 
-                <p className="activity-description">{description}</p>
+                    <div className="activity-tags">
+                      {(Array.isArray(tags) ? tags : []).map((tag, i) => (
+                        <Chip
+                          key={i}
+                          label={tag}
+                          className="tag-chip"
+                          style={{ backgroundColor: '#6E003C', color: '#fff', fontFamily: 'Roboto, Helvetica', fontWeight: 500 }}
+                        />
+                      ))}
+                    </div>
+
+                    <p className="activity-description">{description}</p>
+                  </>
+                )}
 
                 {/* Actions */}
                 {userType === "owner" && (
@@ -220,47 +234,69 @@ const ActivityDetails = () => {
                       fullWidth
                       className="delete-button"
                       onClick={handleDelete}
+                      disabled={isCanceled}
                     >
-                      Delete activity
+                      {isCanceled ? "Already canceled" : "Cancel activity"}
                     </Button>
-                    <Button
-                      variant="contained"
-                      color="salmon"
-                      fullWidth
-                      className="chat-button"
-                      onClick={() => navigate(`/groupChat/${id}`)}  // << route with id
-                      style={{ marginTop: 12 }}
-                    >
-                      Activity group chat
-                    </Button>
+
+                    {!isCanceled && (
+                      <Button
+                        variant="contained"
+                        color="salmon"
+                        fullWidth
+                        className="chat-button"
+                        onClick={() => navigate(`/groupChat/${id}`)}
+                        style={{ marginTop: 12 }}
+                      >
+                        Activity group chat
+                      </Button>
+                    )}
                   </>
                 )}
 
+                {/* Subscriber actions */}
                 {userType === "subscribed" && (
                   <>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      fullWidth
-                      className="unsubscribe-button"
-                      onClick={handleUnsubscribe}
-                    >
-                      Unsubscribe from activity
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="salmon"
-                      fullWidth
-                      className="chat-button"
-                      onClick={() => navigate(`/groupChat/${id}`)}  // << route with id
-                      style={{ marginTop: 12 }}
-                    >
-                      Activity group chat
-                    </Button>
+                    {!isCanceled && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          fullWidth
+                          className="unsubscribe-button"
+                          onClick={handleUnsubscribe}
+                        >
+                          Unsubscribe from activity
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="salmon"
+                          fullWidth
+                          className="chat-button"
+                          onClick={() => navigate(`/groupChat/${id}`)}
+                          style={{ marginTop: 12 }}
+                        >
+                          Activity group chat
+                        </Button>
+                      </>
+                    )}
+
+                    {isCanceled && (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        fullWidth
+                        className="unsubscribe-button"
+                        onClick={handleUnsubscribe}
+                      >
+                        Unsubscribe (remove from my list)
+                      </Button>
+                    )}
                   </>
                 )}
 
-                {userType === "default" && (
+                {/* Default user can’t subscribe if canceled */}
+                {userType === "default" && !isCanceled && (
                   <Button
                     variant="contained"
                     color="salmon"

@@ -43,8 +43,8 @@ public class ActivityController {
         public String startTime;
         public String endTime;
         public Integer capacity;
-        public String status;
-        public List<String> tags; // optional
+        public String status; // POSTED | EXPIRED | CANCELED
+        public List<String> tags;
     }
 
     public static class JoinRequest {
@@ -61,7 +61,7 @@ public class ActivityController {
                 .collect(Collectors.toSet());
     }
 
-    // CREATE
+    // CREATE -> default POSTED
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateActivityRequest req) {
         Optional<User> organizerOpt = userRepository.findById(req.organizerId);
@@ -75,6 +75,7 @@ public class ActivityController {
         a.setCapacity(req.capacity);
         a.setOrganizer(organizerOpt.get());
         a.setCreatedAt(LocalDateTime.now());
+        a.setStatus(ActivityStatus.POSTED);
 
         if (req.startTime != null && !req.startTime.isBlank())
             a.setStartTime(LocalDateTime.parse(req.startTime));
@@ -87,7 +88,7 @@ public class ActivityController {
         return ResponseEntity.ok(saved);
     }
 
-    // UPDATE
+    // UPDATE (allows changing status, e.g., EXPIRED)
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody UpdateActivityRequest req) {
         Optional<Activity> opt = activityRepository.findById(id);
@@ -116,13 +117,28 @@ public class ActivityController {
         return ResponseEntity.ok(saved);
     }
 
-    // LIST ALL (newest first)
-    @GetMapping
-    public List<Activity> listAll() {
-        return activityRepository.findAllByOrderByCreatedAtDesc();
+    // SOFT DELETE -> mark as CANCELED
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> cancel(@PathVariable Integer id) {
+        Optional<Activity> opt = activityRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Activity a = opt.get();
+        if (a.getStatus() == ActivityStatus.CANCELED) {
+            return ResponseEntity.ok(a); // idempotent
+        }
+        a.setStatus(ActivityStatus.CANCELED);
+        Activity saved = activityRepository.save(a);
+        return ResponseEntity.ok(saved);
     }
 
-    // GET ONE
+    // LIST ALL (feed) -> exclude CANCELED
+    @GetMapping
+    public List<Activity> listAll() {
+        return activityRepository.findAllByStatusNotOrderByCreatedAtDesc(ActivityStatus.CANCELED);
+    }
+
+    // GET ONE (can return canceled; front decides how to render)
     @GetMapping("/{id}")
     public ResponseEntity<?> getOne(@PathVariable Integer id) {
         return activityRepository.findById(id)
@@ -142,29 +158,40 @@ public class ActivityController {
         return ResponseEntity.ok(saved);
     }
 
-    // LIST JOINED BY USER
+    // LEAVE (missing before but used by front)
+    @PostMapping("/{activityId}/leave")
+    public ResponseEntity<?> leave(@PathVariable Integer activityId, @RequestBody JoinRequest req) {
+        Optional<Activity> opt = activityRepository.findById(activityId);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Activity a = opt.get();
+        a.removeParticipant(req.userId);
+        Activity saved = activityRepository.save(a);
+        return ResponseEntity.ok(saved);
+    }
+
+    // LIST JOINED BY USER (can include canceled; front will show placeholder)
     @GetMapping("/joined/{userId}")
     public List<Activity> listJoinedByUser(@PathVariable Integer userId) {
         return activityRepository.findByParticipantIdsContains(userId);
     }
 
-    // LIST BY ORGANIZER
+    // LIST BY ORGANIZER (organizer should see their canceled too)
     @GetMapping("/organizer/{organizerId}")
     public List<Activity> listByOrganizer(@PathVariable Integer organizerId) {
         return activityRepository.findByOrganizer_Id(organizerId);
     }
 
-    // SEARCH by tags + date range (all optional)
-    // Example: /api/activities/search?tags=Study,Party&after=2025-12-01T00:00:00&before=2025-12-31T23:59:59
+    // SEARCH (feed) -> exclude CANCELED, then apply filters
     @GetMapping("/search")
     public List<Activity> search(
             @RequestParam(required = false) String tags,
             @RequestParam(required = false) String after,
             @RequestParam(required = false) String before
     ) {
-        List<Activity> base = activityRepository.findAllByOrderByCreatedAtDesc();
+        List<Activity> base = activityRepository.findAllByStatusNotOrderByCreatedAtDesc(ActivityStatus.CANCELED);
 
-        // filter by tags (ANY match)
+        // filter by tags (ANY)
         if (tags != null && !tags.isBlank()) {
             Set<Tag> wanted = Arrays.stream(tags.split(","))
                     .map(String::trim)
@@ -183,7 +210,7 @@ public class ActivityController {
                     .collect(Collectors.toList());
         }
 
-        // filter by date range
+        // date range
         LocalDateTime afterDt = (after != null && !after.isBlank()) ? LocalDateTime.parse(after) : null;
         LocalDateTime beforeDt = (before != null && !before.isBlank()) ? LocalDateTime.parse(before) : null;
 

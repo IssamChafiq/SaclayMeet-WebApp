@@ -104,15 +104,19 @@ const ActivitiesCreated = () => {
           </div>
 
           <div className="activities-list">
-            {filtered.map((activity) => (
-              <ActivityCard
-                key={activity.id}
-                title={activity.title}
-                description={activity.description}
-                tags={Array.isArray(activity.tags) ? activity.tags : []}
-                onClick={() => navigate(`/activity/${activity.id}`)}
-              />
-            ))}
+            {filtered.map((activity) => {
+              const isCanceled = activity.status === "CANCELED";
+              const title = isCanceled ? `(CANCELED) ${activity.title || ""}` : activity.title;
+              return (
+                <ActivityCard
+                  key={activity.id}
+                  title={title}
+                  description={activity.description}
+                  tags={Array.isArray(activity.tags) ? activity.tags : []}
+                  onClick={() => navigate(`/activity/${activity.id}`)}
+                />
+              );
+            })}
             {filtered.length === 0 && (
               <div style={{ opacity: 0.7, padding: "1rem" }}>
                 You haven’t created any activity yet.
