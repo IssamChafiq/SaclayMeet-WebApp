@@ -202,12 +202,14 @@ const ActivityDetails = () => {
                   <>
                     <p className="activity-date">{dateLine}</p>
                     <p className="activity-place">{location}</p>
-                    <p
-                      className="activity-author"
-                      onClick={handleAuthorClick}
-                      style={{ cursor: "pointer" }}
-                    >
-                      By {authorName || "Unknown"}
+                    <p className="activity-author">
+                      By {' '}
+                      <span
+                        className="author-link"
+                        onClick={handleAuthorClick}
+                      >
+                        {authorName}
+                      </span>
                     </p>
 
                     <div className="activity-tags">
