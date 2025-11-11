@@ -17,6 +17,16 @@ theme = createTheme(theme, {
   },
 });
 
+// Normalize image values like in ActivityCard/Profile
+const normalizeImageSrc = (image) => {
+  if (!image) return "";
+  const s = String(image);
+  if (s.startsWith("data:image/")) return s;
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  if (s.startsWith("/api/images")) return `http://localhost:8080${s}`;
+  return s;
+};
+
 function formatDateTime(dt) {
   if (!dt) return "";
   const d = new Date(dt);
@@ -38,10 +48,14 @@ const ActivityDetails = () => {
     let ignore = false;
     (async () => {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/api/activities/${id}`);
-      if (!ignore) {
-        if (res.ok) setActivity(await res.json());
-        setLoading(false);
+      try {
+        const res = await fetch(`http://localhost:8080/api/activities/${id}`);
+        if (!ignore) {
+          if (res.ok) setActivity(await res.json());
+          setLoading(false);
+        }
+      } catch {
+        if (!ignore) setLoading(false);
       }
     })();
     return () => { ignore = true; };
@@ -80,6 +94,7 @@ const ActivityDetails = () => {
 
   // Soft delete -> cancel
   const handleDelete = async () => {
+    // eslint-disable-next-line no-restricted-globals
     if (!confirm("Cancel this activity?")) return;
     const res = await fetch(`http://localhost:8080/api/activities/${id}`, { method: "DELETE" });
     if (res.ok) reload(); // stay; list pages will hide it
@@ -154,10 +169,12 @@ const ActivityDetails = () => {
     .join(" ");
   const authorName = organizer ? `${organizer.firstName || ""} ${organizer.lastName || ""}`.trim() : "Unknown";
 
-  const cover = imageUrl || image?.url || null;
+  // Prefer imageUrl (string) then image?.url; normalize for backend-served paths
+  const coverRaw = imageUrl || image?.url || "";
+  const cover = normalizeImageSrc(coverRaw);
 
-  // Render variants
-  const showPlaceholderForSubscriber = isCanceled && userType !== "owner";
+  // If canceled and viewer is NOT the owner, we hide the content (your prior behavior)
+  const hideForSubscriber = isCanceled && userType !== "owner";
 
   return (
     <ThemeProvider theme={theme}>
@@ -180,30 +197,33 @@ const ActivityDetails = () => {
           <div className="details-card">
             <div className="card-layout">
 
-              {/* Image */}
+              {/* Image (uses normalized URL) */}
               <div
                 className="activity-image"
                 style={{
-                  backgroundImage: cover && !showPlaceholderForSubscriber ? `url(${cover})` : "none",
+                  backgroundImage: (!hideForSubscriber && cover) ? `url(${cover})` : "none",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
+                  backgroundColor: "#eee"
                 }}
+                aria-label="Activity cover image"
+                role="img"
               />
 
               {/* Info */}
               <div className="activity-info">
                 <h1 className="activity-title">
-                  {showPlaceholderForSubscriber
+                  {hideForSubscriber
                     ? "This activity has been canceled"
                     : (isCanceled ? `(CANCELED) ${title || ""}` : (title || ""))}
                 </h1>
 
-                {!showPlaceholderForSubscriber && (
+                {!hideForSubscriber && (
                   <>
                     <p className="activity-date">{dateLine}</p>
                     <p className="activity-place">{location}</p>
                     <p className="activity-author">
-                      By {' '}
+                      By{' '}
                       <span
                         className="author-link"
                         onClick={handleAuthorClick}
