@@ -20,6 +20,16 @@ theme = createTheme(theme, {
   },
 });
 
+// Normalize any image value for <img>/<Avatar src>
+const normalizeImageSrc = (image) => {
+  if (!image) return "";
+  const s = String(image);
+  if (s.startsWith("data:image/")) return s;
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  if (s.startsWith("/api/images")) return `http://localhost:8080${s}`;
+  return s;
+};
+
 const fmtTime = (iso) => {
   if (!iso) return "";
   const d = new Date(iso);
@@ -36,7 +46,7 @@ async function safeFetchJson(url, options = {}, timeoutMs = 5000) {
     const text = await res.text();
     const data = text ? JSON.parse(text) : null;
     return { ok: true, status: res.status, data };
-  } catch (e) {
+  } catch {
     return { ok: false, status: 0, data: null };
   } finally {
     clearTimeout(t);
@@ -72,24 +82,25 @@ const GroupChat = () => {
   const [loading, setLoading] = useState(true);
   const [warn, setWarn] = useState("");
 
-  // name cache: { [userId]: "First Last" }
-  const [nameById, setNameById] = useState({});
+  // user cache: { [userId]: { name, avatar } }
+  const [userById, setUserById] = useState({});
   const [pendingFetch, setPendingFetch] = useState(new Set());
 
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  const ensureUserName = async (userId) => {
-    if (!userId || nameById[userId]) return;
+  const ensureUser = async (userId) => {
+    if (!userId || userById[userId]) return;
     if (pendingFetch.has(userId)) return;
     setPendingFetch(prev => new Set(prev).add(userId));
 
     const res = await safeFetchJson(`http://localhost:8080/api/users/${userId}`);
     if (res.ok && res.data) {
-      const label = fullName(res.data) || `User ${userId}`;
-      setNameById(prev => ({ ...prev, [userId]: label }));
+      const name = fullName(res.data) || `User ${userId}`;
+      const avatar = normalizeImageSrc(res.data.profileImageUrl || "");
+      setUserById(prev => ({ ...prev, [userId]: { name, avatar } }));
     } else {
-      setNameById(prev => ({ ...prev, [userId]: `User ${userId}` }));
+      setUserById(prev => ({ ...prev, [userId]: { name: `User ${userId}`, avatar: "" } }));
     }
 
     setPendingFetch(prev => {
@@ -117,7 +128,7 @@ const GroupChat = () => {
       const a = await safeFetchJson(`http://localhost:8080/api/activities/${activityId}`);
       if (!cancelled && a.ok && a.data) {
         setActivityTitle(a.data.title || "Group Chat");
-        if (a.data.organizer?.id) ensureUserName(a.data.organizer.id);
+        if (a.data.organizer?.id) ensureUser(a.data.organizer.id);
       }
 
       // load messages
@@ -134,8 +145,8 @@ const GroupChat = () => {
         setMessages(mapped);
 
         const uniqueIds = [...new Set(mapped.map(mm => mm.userId).filter(Boolean))];
-        uniqueIds.forEach(uid => ensureUserName(uid));
-        if (!Number.isNaN(currentUserId)) ensureUserName(currentUserId);
+        uniqueIds.forEach(uid => ensureUser(uid));
+        if (!Number.isNaN(currentUserId)) ensureUser(currentUserId);
       } else {
         setWarn("Unable to load chat messages right now.");
       }
@@ -147,16 +158,15 @@ const GroupChat = () => {
 
   const canSend = newMessage.trim().length > 0 && !notLoggedIn && activityId != null;
 
-  const myDisplayName = useMemo(() => {
-    if (notLoggedIn) return null;
-    return nameById[currentUserId] || `User ${currentUserId}`;
-  }, [nameById, currentUserId, notLoggedIn]);
+  const myEntry = userById[currentUserId] || {};
+  const myDisplayName = myEntry.name || (notLoggedIn ? null : `User ${currentUserId}`);
+  const myAvatar = myEntry.avatar || "";
 
   const handleSend = async () => {
     const body = newMessage.trim();
     if (!body || notLoggedIn || activityId == null) return;
 
-    ensureUserName(currentUserId);
+    ensureUser(currentUserId);
 
     // optimistic add
     const tempId = `tmp-${Date.now()}`;
@@ -186,7 +196,7 @@ const GroupChat = () => {
     }
 
     const saved = res.data;
-    if (saved.userId) ensureUserName(saved.userId);
+    if (saved.userId) ensureUser(saved.userId);
 
     // replace optimistic with real one
     setMessages(prev => prev.map(m => m.id === tempId ? ({
@@ -204,10 +214,8 @@ const GroupChat = () => {
     }
   };
 
-  const displayNameFor = (msg) => {
-    if (!msg?.userId) return "Unknown";
-    return nameById[msg.userId] || `User ${msg.userId}`;
-  };
+  const nameFor = (userId) => (userById[userId]?.name) || (userId ? `User ${userId}` : "Unknown");
+  const avatarFor = (userId) => userById[userId]?.avatar || "";
 
   const initialFor = (name) => (name && name.trim()[0]) ? name.trim()[0].toUpperCase() : "?";
 
@@ -240,12 +248,25 @@ const GroupChat = () => {
             {/* Messages */}
             <div className="messages-area">
               {loading && <div style={{ opacity: 0.7 }}>Loading…</div>}
+
               {!loading && messages.map(m => {
-                const name = displayNameFor(m);
+                const name = nameFor(m.userId);
                 const isMe = m.userId === currentUserId;
+                const pic = avatarFor(m.userId);
+                const initial = initialFor(name);
+
                 return (
                   <div key={m.id} className={`message-wrapper ${isMe ? 'own-message' : 'other-message'}`}>
-                    {!isMe && <Avatar className="message-avatar">{initialFor(name)}</Avatar>}
+                    {!isMe && (
+                      <Avatar
+                        className="message-avatar"
+                        src={pic || undefined}
+                        imgProps={{ loading: "lazy", onError: (e) => { e.currentTarget.src = ""; } }}
+                      >
+                        {initial}
+                      </Avatar>
+                    )}
+
                     <div className="message-content">
                       {!isMe && <p className="message-author">{name}</p>}
                       <div className={`message-bubble ${isMe ? 'own-bubble' : 'other-bubble'}`}>
@@ -253,7 +274,16 @@ const GroupChat = () => {
                       </div>
                       <p className="message-time">{m.timestamp}</p>
                     </div>
-                    {isMe && <Avatar className="message-avatar own-avatar">{initialFor(myDisplayName)}</Avatar>}
+
+                    {isMe && (
+                      <Avatar
+                        className="message-avatar own-avatar"
+                        src={myAvatar || undefined}
+                        imgProps={{ loading: "lazy", onError: (e) => { e.currentTarget.src = ""; } }}
+                      >
+                        {initialFor(myDisplayName)}
+                      </Avatar>
+                    )}
                   </div>
                 );
               })}
