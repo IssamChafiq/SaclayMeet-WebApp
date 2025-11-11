@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -14,6 +14,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import 'dayjs/locale/fr';
 
 let theme = createTheme({});
 theme = createTheme(theme, {
@@ -38,17 +39,22 @@ function getAgeFromBirthDate(birthDateStr) {
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
 
   const [profileData, setProfileData] = useState({
-    firstName: "", lastName: "", email: "",
-    birthDate: "", schoolName: "", level: "", bio: "",
-    facebook: "", instagram: "", snapchat: "", linkedin: "",
-    profileImageUrl: null,
+    firstName: "",
+    lastName: "",
+    email: "",
+    birthDate: "",
+    schoolName: "",
+    level: "",
+    bio: "",
+    facebook: "",
+    snapchat: "",
+    instagram: "",
+    linkedin: "",
+    // profileImageUrl intentionally ignored for now
   });
 
-  const [imagePreview, setImagePreview] = useState(null);   // dataUrl or server URL
-  const [imageDataUrl, setImageDataUrl] = useState("");     // new image (if chosen)
   const [isEditing, setIsEditing] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -57,7 +63,7 @@ const UserProfile = () => {
     if (!userId) return;
 
     fetch(`http://localhost:8080/api/users/${userId}`)
-      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(res => res.ok ? res.json() : Promise.reject(res))
       .then(data => {
         setProfileData({
           firstName: data.firstName || "",
@@ -68,37 +74,24 @@ const UserProfile = () => {
           level: data.level || "",
           bio: data.bio || "",
           facebook: data.facebook || "",
-          instagram: data.instagram || "",
           snapchat: data.snapchat || "",
-          linkedin: data.linkedin || "",
-          profileImageUrl: data.profileImageUrl || null
+          instagram: data.instagram || "",
+          linkedin: data.linkedin || ""
         });
-        setImagePreview(data.profileImageUrl || null);
       })
       .catch(() => setSnackbar({ open: true, message: 'Failed to load profile', severity: 'error' }));
   }, []);
-
-  const onPickFile = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = String(reader.result);
-      setImagePreview(dataUrl);
-      setImageDataUrl(dataUrl);
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleSaveProfile = async () => {
     const userId = sessionStorage.getItem("userId");
     if (!userId) return;
 
+    // build payload WITHOUT image fields
     const payload = {
       firstName: profileData.firstName,
       lastName: profileData.lastName,
       email: profileData.email,
-      birthDate: profileData.birthDate || "",
+      birthDate: profileData.birthDate || "", // allow clearing
       schoolName: profileData.schoolName,
       level: profileData.level,
       bio: profileData.bio,
@@ -109,26 +102,24 @@ const UserProfile = () => {
     };
 
     try {
-      // 1) Update plain fields
       const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error(await res.text() || 'Failed to update profile');
-      const updated = await res.json();
 
-      // 2) If new image was chosen, upload it as data URL (same pattern as activities)
-      if (imageDataUrl) {
-        const ir = await fetch(`http://localhost:8080/api/users/${userId}/profile-image`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dataUrl: imageDataUrl })
-        });
-        if (!ir.ok) throw new Error(await ir.text() || 'Failed to update profile image');
-        const imgResp = await ir.json();
-        updated.profileImageUrl = imgResp.profileImageUrl || null;
+      if (!res.ok) {
+        let msg = 'Failed to update profile';
+        try {
+          const t = await res.text();
+          if (t) msg = t;
+        } catch (_) {}
+        throw new Error(msg);
       }
 
-      setProfileData(prev => ({ ...prev, ...updated }));
-      setImageDataUrl("");
+      const data = await res.json();
+      sessionStorage.setItem("userName", `${data.firstName || ""} ${data.lastName || ""}`.trim());
+      setProfileData(prev => ({ ...prev, ...data }));
       setIsEditing(false);
       setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
     } catch (err) {
@@ -151,55 +142,45 @@ const UserProfile = () => {
       <div className="profile-page">
         <div className="header">
           <div className="logo-box">
-            <img className="logo-saclay-meet" alt="Logo saclay meet"
-                 src={logoSaclayMeet1}
-                 onClick={() => navigate("/viewActivities")} />
+            <img
+              className="logo-saclay-meet"
+              alt="Logo saclay meet"
+              src={logoSaclayMeet1}
+              onClick={() => navigate("/viewActivities")}
+            />
           </div>
           <NavButtons
-            name1="Profile" name2="View activities" name3="Create activity"
-            path1="/userProfile" path2="/viewActivities" path3="/createActivity"
-            current="first" inline={true}
+            name1="Profile"
+            name2="View activities"
+            name3="Create activity"
+            path1="/userProfile"
+            path2="/viewActivities"
+            path3="/createActivity"
+            current="first"
+            inline={true}
           />
         </div>
 
         <div className="profile-content">
           <NavButtons
-            name1="Profile" name2="Activities created" name3="Upcoming activities"
-            path1="/userProfile" path2="/activitiesCreated" path3="/upcomingActivities"
-            current="first" inline={false}
+            name1="Profile"
+            name2="Activities created"
+            name3="Upcoming activities"
+            path1="/userProfile"
+            path2="/activitiesCreated"
+            path3="/upcomingActivities"
+            current="first"
+            inline={false}
           />
 
           <div className="profile-main">
             <div className="profile-header">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Profile"
-                  style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover' }}
-                />
-              ) : (
-                <Avatar sx={{ width: 100, height: 100 }} />
-              )}
-
-              {isEditing && (
-                <>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={onPickFile}
-                  />
-                  <Button
-                    variant="outlined" color="salmon" size="small"
-                    onClick={() => fileInputRef.current?.click()}
-                    sx={{ mt: 1 }} startIcon={<Camera size={18} />}
-                  >
-                    Change photo
-                  </Button>
-                </>
-              )}
-
+              {/* Static avatar for now; image is out of scope */}
+              <Avatar
+                className="profile-avatar"
+                alt={`${profileData.firstName} ${profileData.lastName}`}
+                sx={{ width: 100, height: 100 }}
+              />
               <h1 className="profile-name">{profileData.firstName} {profileData.lastName}</h1>
               <p className="profile-email">{profileData.email}</p>
             </div>
@@ -230,7 +211,7 @@ const UserProfile = () => {
                 <div className="form-field">
                   <label className="field-label">{isEditing ? 'Birth Date' : 'Age'}</label>
                   {isEditing ? (
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
                       <DatePicker
                         value={profileData.birthDate ? dayjs(profileData.birthDate) : null}
                         onChange={(v) => setProfileData({ ...profileData, birthDate: v ? v.format('YYYY-MM-DD') : '' })}
@@ -265,29 +246,32 @@ const UserProfile = () => {
                   disabled={!isEditing} />
               </div>
 
+              {/* Social links */}
               <div className="social-section">
                 <div className="social-row">
                   <div className="social-field">
-                    <Facebook size={24} className="social-icon" />
+                    <Facebook size={24} className="social-icon" color="#1877F2" />
                     <TextField fullWidth variant="outlined" value={profileData.facebook}
                       onChange={(e) => setProfileData({ ...profileData, facebook: e.target.value })}
                       disabled={!isEditing} />
                   </div>
                   <div className="social-field">
-                    <Instagram size={24} className="social-icon" />
+                    <Instagram size={24} className="social-icon" color="#E4405F" />
                     <TextField fullWidth variant="outlined" value={profileData.instagram}
                       onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
                       disabled={!isEditing} />
                   </div>
                 </div>
+
                 <div className="social-row">
                   <div className="social-field">
-                    <TextField fullWidth label="Snapchat" variant="outlined" value={profileData.snapchat}
+                    <Camera size={24} className="social-icon" color="#FFFC00" />
+                    <TextField fullWidth variant="outlined" value={profileData.snapchat}
                       onChange={(e) => setProfileData({ ...profileData, snapchat: e.target.value })}
                       disabled={!isEditing} />
                   </div>
                   <div className="social-field">
-                    <Linkedin size={24} className="social-icon" />
+                    <Linkedin size={24} className="social-icon" color="#0A66C2" />
                     <TextField fullWidth variant="outlined" value={profileData.linkedin}
                       onChange={(e) => setProfileData({ ...profileData, linkedin: e.target.value })}
                       disabled={!isEditing} />
@@ -302,8 +286,7 @@ const UserProfile = () => {
                   <Button color="salmon" variant="contained" size="large" onClick={handleSaveProfile}>
                     Save Changes
                   </Button>
-                  <Button color="salmon" variant="outlined" size="large"
-                          onClick={() => { setIsEditing(false); setImageDataUrl(""); setImagePreview(profileData.profileImageUrl || null); }}>
+                  <Button color="salmon" variant="outlined" size="large" onClick={() => setIsEditing(false)}>
                     Cancel
                   </Button>
                 </>
@@ -319,8 +302,6 @@ const UserProfile = () => {
             </div>
           </div>
         </div>
-
-        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onPickFile} />
       </div>
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={handleCloseSnackbar}

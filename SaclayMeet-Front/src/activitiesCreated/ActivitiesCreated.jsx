@@ -113,12 +113,10 @@ const ActivitiesCreated = () => {
                   title={title}
                   description={activity.description}
                   tags={Array.isArray(activity.tags) ? activity.tags : []}
-                  imageUrl={activity.imageUrl || (activity.image && activity.image.url) || ""}
                   onClick={() => navigate(`/activity/${activity.id}`)}
                 />
               );
             })}
-
             {filtered.length === 0 && (
               <div style={{ opacity: 0.7, padding: "1rem" }}>
                 You haven’t created any activity yet.

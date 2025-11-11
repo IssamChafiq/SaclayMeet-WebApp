@@ -179,17 +179,16 @@ const ViewActivities = () => {
           {/* Activities list */}
           <div className="activities-list">
             {loading && <div style={{ opacity: 0.7, padding: "1rem" }}>Loading…</div>}
+
             {!loading && filtered.map((activity) => (
               <ActivityCard
                 key={activity.id}
                 title={activity.title}
                 description={activity.description}
                 tags={Array.isArray(activity.tags) ? activity.tags : []}
-                imageUrl={activity.imageUrl || (activity.image && activity.image.url) || ""}
                 onClick={() => navigate(`/activity/${activity.id}`)}
               />
             ))}
-
 
             {!loading && filtered.length === 0 && (
               <div style={{ opacity: 0.7, padding: "1rem" }}>

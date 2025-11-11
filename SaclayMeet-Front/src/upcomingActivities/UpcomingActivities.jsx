@@ -118,19 +118,16 @@ const UpcomingActivities = () => {
               const title = isCanceled ? "This activity has been canceled" : (activity.title || "");
               const description = isCanceled ? "" : (activity.description || "");
               const tags = isCanceled ? [] : (Array.isArray(activity.tags) ? activity.tags : []);
-              const imageUrl = isCanceled ? "" : (activity.imageUrl || (activity.image && activity.image.url) || "");
               return (
                 <ActivityCard
                   key={activity.id}
                   title={title}
                   description={description}
                   tags={tags}
-                  imageUrl={imageUrl}
                   onClick={() => navigate(`/activity/${activity.id}`)}
                 />
               );
             })}
-
             {filtered.length === 0 && (
               <div style={{ opacity: 0.7, padding: "1rem" }}>
                 No upcoming subscriptions found.
