@@ -28,7 +28,6 @@
     height: auto;
 }
 
-/* effet au clic (apparaît immédiatement au mousedown) */
 .logo-saclay-meet:active,
 .logo-saclay-meet:focus {
     transform: scale(0.96);
@@ -47,15 +46,6 @@
     flex: 1;
 }
 
-.profile-sidebar {
-    width: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 20px;
-    flex-shrink: 0;
-}
-
 .profile-main {
     flex: 1;
     background-color: #ffffff;
@@ -71,9 +61,22 @@
     margin-bottom: 40px;
 }
 
+/* fallback avatar circle */
 .profile-avatar {
     background-color: #555555;
     margin-bottom: 16px;
+}
+
+/* real profile image */
+.profile-photo {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #6E003C;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-bottom: 16px;
+    background: #f3f3f3;
 }
 
 .profile-name {
@@ -115,14 +118,11 @@
     display: block;
 }
 
-.input-field {
-    background-color: #ffffff;
-}
-
 .bio-section {
     margin-bottom: 32px;
 }
 
+/* socials */
 .social-section {
     display: flex;
     flex-direction: column;
@@ -132,18 +132,28 @@
 .social-row {
     display: flex;
     gap: 32px;
+    flex-wrap: wrap;
 }
 
 .social-field {
     flex: 1;
+    min-width: 280px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .social-icon {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
+}
+
+.social-link {
+    color: #1b1b1b;
+    text-decoration: underline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
 }
