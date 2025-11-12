@@ -115,7 +115,7 @@ const ViewActivities = () => {
         {/* Search */}
         <div className="search-container">
           <TextField
-            placeholder="Search"
+            placeholder="Search activities..."
             variant="outlined"
             className="search-field"
             value={search}
@@ -134,9 +134,10 @@ const ViewActivities = () => {
           {/* Sidebar filters */}
           <div className="sidebar">
             <div className="filters-box">
-              <h3 className="filters-title">Filters :</h3>
+              <h3 className="filters-title">Filters</h3>
 
               <div className="filter-category">
+                <p className="category-title">Tags</p>
                 {ALL_TAGS.map(tag => (
                   <FormControlLabel
                     key={tag}
@@ -159,6 +160,11 @@ const ViewActivities = () => {
                     label="Start date"
                     value={afterDate}
                     onChange={(d) => setAfterDate(d)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true
+                      }
+                    }}
                   />
                 </LocalizationProvider>
               </div>
@@ -170,6 +176,11 @@ const ViewActivities = () => {
                     label="End date"
                     value={beforeDate}
                     onChange={(d) => setBeforeDate(d)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true
+                      }
+                    }}
                   />
                 </LocalizationProvider>
               </div>
@@ -178,7 +189,11 @@ const ViewActivities = () => {
 
           {/* Activities list */}
           <div className="activities-list">
-            {loading && <div style={{ opacity: 0.7, padding: "1rem" }}>Loading…</div>}
+            {loading && (
+              <div className="loading-message">
+                Loading activities...
+              </div>
+            )}
 
             {!loading && filtered.map((activity) => (
               <ActivityCard
@@ -194,8 +209,8 @@ const ViewActivities = () => {
             ))}
 
             {!loading && filtered.length === 0 && (
-              <div style={{ opacity: 0.7, padding: "1rem" }}>
-                No activities match your filters.
+              <div className="empty-message">
+                No activities match your filters. Try adjusting your search criteria!
               </div>
             )}
           </div>
