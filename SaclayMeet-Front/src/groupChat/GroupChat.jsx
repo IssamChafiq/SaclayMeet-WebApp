@@ -232,7 +232,7 @@ const GroupChat = () => {
 
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
           {warn && <Alert severity="warning" sx={{ mb: 2 }}>{warn}</Alert>}
-          {notLoggedIn && <Alert severity="info" sx={{ mb: 2 }}>You’re not logged in. Sign in to send messages.</Alert>}
+          {notLoggedIn && <Alert severity="info" sx={{ mb: 2 }}>You're not logged in. Sign in to send messages.</Alert>}
           {activityId == null && <Alert severity="info" sx={{ mb: 2 }}>Open chat from an activity page.</Alert>}
         </div>
 
@@ -241,7 +241,7 @@ const GroupChat = () => {
           <div className="chat-card">
             {/* Chat Header */}
             <div className="chat-header">
-              <h2 className="chat-title">Group Chat – {activityTitle}</h2>
+              <h2 className="chat-title">Group Chat - {activityTitle}</h2>
               <p className="chat-subtitle">Discussion about the activity</p>
             </div>
 

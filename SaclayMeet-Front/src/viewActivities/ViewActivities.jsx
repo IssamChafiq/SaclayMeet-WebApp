@@ -13,6 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from "dayjs";
+import 'dayjs/locale/fr';
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 
@@ -153,7 +154,7 @@ const ViewActivities = () => {
 
               <div className="date-filter">
                 <p className="date-label">After</p>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="fr">
                   <DatePicker
                     label="Start date"
                     value={afterDate}
@@ -164,7 +165,7 @@ const ViewActivities = () => {
 
               <div className="date-filter">
                 <p className="date-label">Before</p>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="fr">
                   <DatePicker
                     label="End date"
                     value={beforeDate}

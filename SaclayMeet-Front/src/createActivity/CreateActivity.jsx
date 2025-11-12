@@ -14,6 +14,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import 'dayjs/locale/fr';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 let theme = createTheme({});
@@ -291,7 +292,7 @@ const CreateActivity = () => {
                   onChange={(e) => setLocation(e.target.value)}
                 />
 
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="fr">
                   <DatePicker
                     label="Date"
                     value={date}

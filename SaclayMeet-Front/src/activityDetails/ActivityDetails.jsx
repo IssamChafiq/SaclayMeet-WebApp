@@ -69,6 +69,13 @@ const ActivityDetails = () => {
     return subs.includes(currentUserId) ? "subscribed" : "default";
   }, [activity, currentUserId]);
 
+  // Check if activity is in the past
+  const isPastActivity = useMemo(() => {
+    if (!activity?.endTime && !activity?.startTime) return false;
+    const endDate = activity.endTime ? new Date(activity.endTime) : new Date(activity.startTime);
+    return endDate < new Date();
+  }, [activity]);
+
   const reload = async () => {
     const res = await fetch(`http://localhost:8080/api/activities/${id}`);
     if (res.ok) setActivity(await res.json());
@@ -317,7 +324,7 @@ const ActivityDetails = () => {
                   </>
                 )}
 
-                {/* Default user can’t subscribe if canceled */}
+                {/* Default user can't subscribe if canceled */}
                 {userType === "default" && !isCanceled && (
                   <Button
                     variant="contained"
@@ -325,8 +332,9 @@ const ActivityDetails = () => {
                     fullWidth
                     className="subscribe-button"
                     onClick={handleSubscribe}
+                    disabled={isPastActivity}
                   >
-                    Subscribe to the activity
+                    {isPastActivity ? "Activity has ended" : "Subscribe to the activity"}
                   </Button>
                 )}
               </div>
