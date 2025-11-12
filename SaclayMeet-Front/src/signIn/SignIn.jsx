@@ -61,12 +61,14 @@ const SignIn = () => {
 
         // c) Vérifier la réponse du backend
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json(); // DTO {id,email,firstName,lastName,...}
 
-          // Connexion réussie : on sauvegarde l'ID utilisateur
-          localStorage.setItem("userId", data.id);
+          // Connexion réussie : on sauvegarde les infos utiles
+          sessionStorage.setItem("userId", data.id);
+          sessionStorage.setItem("userEmail", data.email || email);
+          sessionStorage.setItem("userName", `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim());
 
-          // Et on redirige vers la page principale
+          // Rediriger vers la page d'activités
           navigate("/viewActivities");
         } else if (response.status === 401) {
           // Mauvais email ou mot de passe
@@ -135,6 +137,17 @@ const SignIn = () => {
             >
               Sign in
             </Button>
+
+            {/* Lien vers Register */}
+            <p className="signup-prompt">
+              Don't have an account?{' '}
+              <span
+                className="register-link"
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </span>
+            </p>
           </div>
         </div>
       </div>
@@ -143,4 +156,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-

@@ -1,7 +1,8 @@
 package com.et4.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -18,7 +19,11 @@ public class Activity {
     private String description;
 
     private String location;
-    private String Bejaia;
+
+    // TEXT so we can store long data: URLs or data:image;base64,...
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
+
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer capacity;
@@ -28,7 +33,6 @@ public class Activity {
 
     private LocalDateTime createdAt;
 
-    // Relationships
     @ManyToOne
     @JoinColumn(name = "organizer_id")
     private User organizer;
@@ -37,17 +41,33 @@ public class Activity {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToOne
-    @JoinColumn(name = "image_id")
-    private Image image;
+    // Removed: any @OneToOne Image mapping — not storing blobs anymore.
 
     @OneToMany(mappedBy = "activity")
     private List<Registration> registrations = new ArrayList<>();
 
     @OneToOne(mappedBy = "activity")
+    @JsonIgnore
     private Conversation conversation;
 
-    // Getters & Setters
+    @ElementCollection
+    @CollectionTable(name = "activity_participants", joinColumns = @JoinColumn(name = "activity_id"))
+    @Column(name = "user_id")
+    private List<Integer> participantIds = new ArrayList<>();
+
+    @ElementCollection(targetClass = Tag.class)
+    @CollectionTable(name = "activity_tags", joinColumns = @JoinColumn(name = "activity_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag")
+    private Set<Tag> tags = new HashSet<>();
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (status == null) status = ActivityStatus.POSTED;
+    }
+
+    // ===== getters/setters =====
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -59,6 +79,9 @@ public class Activity {
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public LocalDateTime getStartTime() { return startTime; }
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
@@ -74,4 +97,32 @@ public class Activity {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public User getOrganizer() { return organizer; }
+    public void setOrganizer(User organizer) { this.organizer = organizer; }
+
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
+
+    public List<Registration> getRegistrations() { return registrations; }
+    public void setRegistrations(List<Registration> registrations) { this.registrations = registrations; }
+
+    public Conversation getConversation() { return conversation; }
+    public void setConversation(Conversation conversation) { this.conversation = conversation; }
+
+    public List<Integer> getParticipantIds() { return participantIds; }
+    public void setParticipantIds(List<Integer> participantIds) { this.participantIds = participantIds; }
+
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
+
+    public void addParticipant(Integer userId) {
+        if (userId == null) return;
+        if (!this.participantIds.contains(userId)) this.participantIds.add(userId);
+    }
+
+    public void removeParticipant(Integer userId) {
+        if (userId == null) return;
+        this.participantIds.remove(userId);
+    }
 }

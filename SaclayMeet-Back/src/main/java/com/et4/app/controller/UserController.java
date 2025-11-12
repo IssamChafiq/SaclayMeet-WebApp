@@ -2,75 +2,144 @@ package com.et4.app.controller;
 
 import com.et4.app.model.User;
 import com.et4.app.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
+    private final UserRepository users;
 
-    @Autowired
-    private UserRepository userRepository;
+    public UserController(UserRepository users) {
+        this.users = users;
+    }
+
+    public record UserDTO(Integer id, String email, String firstName, String lastName,
+                          String birthDate, String schoolName, String level, String bio,
+                          String facebook, String instagram, String snapchat, String linkedin,
+                          String profileImageUrl) {}
+
+    private static UserDTO toDTO(User u) {
+        return new UserDTO(
+                u.getId(),
+                u.getEmail(),
+                u.getFirstName(),
+                u.getLastName(),
+                u.getBirthDate() != null ? u.getBirthDate().toString() : null,
+                u.getSchoolName(),
+                u.getLevel(),
+                u.getBio(),
+                u.getFacebook(),
+                u.getInstagram(),
+                u.getSnapchat(),
+                u.getLinkedin(),
+                u.getProfileImageUrl()
+        );
+    }
+
+    public record RegisterRequest(String email, String password, String firstName, String lastName) {}
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
-        if (existingUser.isPresent()) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+        if (req == null || req.email() == null || req.password() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
+        }
+        String email = req.email().trim().toLowerCase();
+        if (email.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
+        }
+        if (users.existsByEmailIgnoreCase(email)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email déjà utilisé");
         }
-        User savedUser = userRepository.save(user);
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", savedUser.getId());
-        response.put("email", savedUser.getEmail());
-        return ResponseEntity.ok(response);
+        User u = new User();
+        u.setEmail(email);
+        u.setPassword(req.password());
+        u.setFirstName(req.firstName());
+        u.setLastName(req.lastName());
+        User saved = users.save(u);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(saved));
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody User userData) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
-        }
-
-        User existingUser = userOptional.get();
-        existingUser.setFirstName(userData.getFirstName());
-        existingUser.setLastName(userData.getLastName());
-        existingUser.setBirthDate(userData.getBirthDate());
-        existingUser.setSchoolName(userData.getSchoolName());
-        existingUser.setLevel(userData.getLevel());
-        existingUser.setBio(userData.getBio());
-
-        User updatedUser = userRepository.save(existingUser);
-        return ResponseEntity.ok(updatedUser);
-    }
+    public record LoginRequest(String email, String password) {}
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User loginData) {
-        Optional<User> userOpt = userRepository.findByEmail(loginData.getEmail());
-        if (userOpt.isEmpty()) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        if (req == null || req.email() == null || req.password() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing email or password");
+        }
+        String email = req.email().trim().toLowerCase();
+        Optional<User> opt = users.findByEmailIgnoreCase(email);
+        if (opt.isEmpty() || !opt.get().getPassword().equals(req.password())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect");
         }
-        User user = userOpt.get();
-        if (!user.getPassword().equals(loginData.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect");
-        }
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", user.getId());
-        response.put("email", user.getEmail());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(toDTO(opt.get()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Integer id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
+    public ResponseEntity<?> getOne(@PathVariable Integer id) {
+        return users.findById(id)
+                .<ResponseEntity<?>>map(u -> ResponseEntity.ok(toDTO(u)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+        Optional<User> opt = users.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
+        User u = opt.get();
+
+        if (body.containsKey("firstName")) u.setFirstName((String) body.get("firstName"));
+        if (body.containsKey("lastName"))  u.setLastName((String) body.get("lastName"));
+
+        if (body.containsKey("email")) {
+            String newEmail = (String) body.get("email");
+            if (newEmail != null) newEmail = newEmail.trim().toLowerCase();
+            if (newEmail != null && !newEmail.equals(u.getEmail()) && users.existsByEmailIgnoreCase(newEmail)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Email déjà utilisé");
+            }
+            u.setEmail(newEmail);
         }
-        return ResponseEntity.ok(userOptional.get());
+
+        if (body.containsKey("schoolName")) u.setSchoolName((String) body.get("schoolName"));
+        if (body.containsKey("level"))      u.setLevel((String) body.get("level"));
+        if (body.containsKey("bio"))        u.setBio((String) body.get("bio"));
+
+        if (body.containsKey("facebook"))   u.setFacebook((String) body.get("facebook"));
+        if (body.containsKey("instagram"))  u.setInstagram((String) body.get("instagram"));
+        if (body.containsKey("snapchat"))   u.setSnapchat((String) body.get("snapchat"));
+        if (body.containsKey("linkedin"))   u.setLinkedin((String) body.get("linkedin"));
+
+        // Accept big data URLs or http(s) like we do for activities
+        if (body.containsKey("profileImageUrl")) {
+            String v = (String) body.get("profileImageUrl");
+            if (v == null || v.isBlank()) {
+                u.setProfileImageUrl(null);
+            } else {
+                String s = v.trim();
+                if (s.startsWith("data:image/") || s.startsWith("http://") || s.startsWith("https://") || s.startsWith("/api/images")) {
+                    u.setProfileImageUrl(s);
+                } else {
+                    // if someone passes junk, just drop it instead of breaking
+                    u.setProfileImageUrl(null);
+                }
+            }
+        }
+
+        if (body.containsKey("birthDate")) {
+            String bd = (String) body.get("birthDate");
+            if (bd == null || bd.isBlank()) {
+                u.setBirthDate(null);
+            } else {
+                u.setBirthDate(LocalDate.parse(bd));
+            }
+        }
+
+        User saved = users.save(u);
+        return ResponseEntity.ok(toDTO(saved));
     }
 }

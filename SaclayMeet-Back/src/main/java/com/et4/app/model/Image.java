@@ -1,7 +1,7 @@
 package com.et4.app.model;
 
 import jakarta.persistence.*;
-import java.util.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "image")
@@ -11,38 +11,32 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "storage_location", nullable = false)
-    private StorageLocation storageLocation;
+    @Column(name = "content_type", length = 100, nullable = false)
+    private String contentType;
 
-    private String directory;
-    private String url;
+    // Store raw bytes in Postgres bytea
+    @Lob
+    @Column(name = "data", columnDefinition = "bigint", nullable = false)
+    private byte[] data;
 
-    // Relation with User
-    @OneToOne(mappedBy = "image")
-    private User user;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    // Relation with Activity
-    @OneToOne(mappedBy = "image")
-    private Activity activity;
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+    }
 
-    // Getters & Setters
+    // --- getters / setters ---
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
-    public StorageLocation getStorageLocation() { return storageLocation; }
-    public void setStorageLocation(StorageLocation storageLocation) { this.storageLocation = storageLocation; }
+    public String getContentType() { return contentType; }
+    public void setContentType(String contentType) { this.contentType = contentType; }
 
-    public String getDirectory() { return directory; }
-    public void setDirectory(String directory) { this.directory = directory; }
+    public byte[] getData() { return data; }
+    public void setData(byte[] data) { this.data = data; }
 
-    public String getUrl() { return url; }
-    public void setUrl(String url) { this.url = url; }
-
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-
-    public Activity getActivity() { return activity; }
-    public void setActivity(Activity activity) { this.activity = activity; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
-

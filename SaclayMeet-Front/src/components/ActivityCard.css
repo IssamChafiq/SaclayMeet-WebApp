@@ -8,8 +8,8 @@
 }
 
 .activity-image {
-    width: 150px;
-    height: 150px;
+    max-width: 250px;
+    max-height: 250px;
     background-color: #d9d9d9;
     border-radius: 4px;
     flex-shrink: 0;
@@ -19,7 +19,6 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
 .activity-title {
@@ -28,6 +27,13 @@
     font-weight: 700;
     margin: 0;
     color: #000000;
+}
+
+.activity-date {
+    font-family: "Roboto-Regular", Helvetica;
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    color: #333333;
 }
 
 .activity-description {
@@ -58,4 +64,14 @@
     color: #000000;
     font-family: "Roboto-Bold", Helvetica;
     font-size: 16px;
+}
+
+.delete-button {
+    display: flex;
+    align-items: center;
+}
+
+.unsubscribe-button {
+    display: flex;
+    align-items: center;
 }

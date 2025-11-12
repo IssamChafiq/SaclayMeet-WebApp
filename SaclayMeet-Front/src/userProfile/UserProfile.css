@@ -1,0 +1,161 @@
+.profile-page {
+    background-color: #ebb2b2;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 32px;
+    background-color: #ebb2b2;
+}
+
+.logo-box {
+    background-color: #6E003C;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.logo-saclay-meet {
+    transition: transform 120ms ease, filter 120ms ease;
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* effet au clic (apparaît immédiatement au mousedown) */
+.logo-saclay-meet:active,
+.logo-saclay-meet:focus {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+    outline: none;
+}
+
+.logo-saclay-meet:focus-visible {
+    box-shadow: 0 0 0 3px rgba(110,0,60,0.18);
+}
+
+.profile-content {
+    display: flex;
+    gap: 24px;
+    padding: 32px;
+    margin-top: 10px;
+    flex: 1;
+}
+
+.profile-sidebar {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+    flex-shrink: 0;
+}
+
+.profile-main {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 48px;
+    margin-top: -30px;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.profile-avatar {
+    background-color: #555555;
+    margin-bottom: 16px;
+}
+
+.profile-name {
+    font-family: "Roboto-Bold", Helvetica;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.profile-email {
+    font-family: "Roboto-Regular", Helvetica;
+    font-size: 14px;
+    color: #666666;
+    margin: 0;
+}
+
+.profile-form {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-row {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 24px;
+}
+
+.form-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.field-label {
+    font-family: "Roboto-Bold", Helvetica;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.input-field {
+    background-color: #ffffff;
+}
+
+.bio-section {
+    margin-bottom: 32px;
+}
+
+.social-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.social-row {
+    display: flex;
+    gap: 32px;
+}
+
+.social-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.social-icon {
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.profile-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    padding-bottom: 2rem;
+}
+
+.profile-actions .MuiButton-root {
+    min-width: 150px;
+}

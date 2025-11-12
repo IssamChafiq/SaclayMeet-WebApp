@@ -1,33 +1,35 @@
 package com.et4.app.model;
 
 import jakarta.persistence.*;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDateTime;
 
+/**
+ * One Conversation per Activity.
+ * Owning side of the @OneToOne that Activity(mappedBy="activity") expects.
+ */
 @Entity
-@Table(name = "conversation")
+@Table(name = "conversations")
 public class Conversation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private LocalDateTime createdAt;
-
+    // <-- THIS is what Activity.mappedBy("activity") points to
     @OneToOne
-    @JoinColumn(name = "activity_id", unique = true)
+    @JoinColumn(name = "activity_id", unique = true, nullable = false)
     private Activity activity;
 
-    @OneToMany(mappedBy = "conversation")
-    private List<Message> messages = new ArrayList<>();
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Getters & Setters
+    public Conversation() {}
+
     public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public Activity getActivity() { return activity; }
     public void setActivity(Activity activity) { this.activity = activity; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

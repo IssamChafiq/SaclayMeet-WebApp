@@ -1,0 +1,76 @@
+.view-activities {
+    background-color: #ebb2b2;
+    min-height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 32px;
+    background-color: #ebb2b2;
+}
+
+.logo-box {
+    background-color: #6E003C;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.logo-saclay-meet {
+    transition: transform 120ms ease, filter 120ms ease;
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* effet au clic (apparaît immédiatement au mousedown) */
+.logo-saclay-meet:active,
+.logo-saclay-meet:focus {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+    outline: none;
+}
+
+.logo-saclay-meet:focus-visible {
+    box-shadow: 0 0 0 3px rgba(110,0,60,0.18);
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    padding: 30px 20px;
+}
+
+.search-field {
+    width: 100%;
+    max-width: 350px;
+    background-color: #ffffff;
+    border-radius: 25px;
+}
+
+.search-field .MuiOutlinedInput-root {
+    border-radius: 25px;
+}
+
+.content {
+    display: flex;
+    gap: 24px;
+    padding: 0 32px 32px 32px;
+    flex: 1;
+}
+
+.sidebar {
+    margin-top: -82px;
+}
+
+.activities-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
