@@ -1,0 +1,9 @@
+.back-button {
+    color: #000000;
+    min-width: auto;
+    padding: 8px;
+}
+
+.back-button:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}

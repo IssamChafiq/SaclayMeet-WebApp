@@ -1,0 +1,266 @@
+.view-activities {
+    background-color: #ebb2b2;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 48px;
+    background-color: rgba(235, 178, 178, 0.95);
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    width: 100%;
+    border-bottom: 2px solid #6E003C;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-box {
+    background-color: #6E003C;
+    padding: 10px;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.logo-box:hover {
+    transform: scale(1.05);
+}
+
+.logo-saclay-meet {
+    transition: transform 120ms ease, filter 120ms ease;
+    display: block;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.logo-saclay-meet:active,
+.logo-saclay-meet:focus {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+    outline: none;
+}
+
+.logo-saclay-meet:focus-visible {
+    box-shadow: 0 0 0 3px rgba(110,0,60,0.18);
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    padding: 32px 20px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.search-field {
+    width: 100%;
+    max-width: 500px;
+    background-color: #ffffff;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.search-field:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.search-field .MuiOutlinedInput-root {
+    border-radius: 25px;
+}
+
+.activities-content {
+    display: flex;
+    gap: 32px;
+    padding: 0 48px 48px 48px;
+    flex: 1;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.filters-box {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 140px;
+}
+
+.filters-title {
+    font-family: "Roboto-Bold", Helvetica;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 24px 0;
+    color: #6E003C;
+}
+
+.filter-category {
+    margin-bottom: 28px;
+}
+
+.category-title {
+    font-family: "Roboto-Medium", Helvetica;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    color: #6E003C;
+    font-weight: 600;
+}
+
+.filter-category .MuiFormControlLabel-root {
+    display: flex;
+    margin-left: 0;
+    margin-bottom: 8px;
+    transition: background-color 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.filter-category .MuiFormControlLabel-root:hover {
+    background-color: rgba(110, 0, 60, 0.05);
+}
+
+.date-filter {
+    margin-bottom: 20px;
+}
+
+.date-label {
+    font-family: "Roboto-Medium", Helvetica;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    color: #6E003C;
+    font-weight: 600;
+}
+
+.activities-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    min-width: 0;
+}
+
+/* Loading and empty states */
+.loading-message,
+.empty-message {
+    opacity: 0.7;
+    padding: 2rem;
+    text-align: center;
+    font-family: "Roboto-Regular", Helvetica;
+    font-size: 16px;
+    color: #666666;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .header {
+        padding: 16px 32px;
+    }
+
+    .activities-content {
+        padding: 0 32px 32px 32px;
+        gap: 24px;
+    }
+
+    .sidebar {
+        width: 240px;
+    }
+
+    .filters-box {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 12px 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .logo-saclay-meet {
+        width: 60px;
+        height: 60px;
+    }
+
+    .search-container {
+        padding: 24px 16px;
+    }
+
+    .search-field {
+        max-width: 100%;
+    }
+
+    .activities-content {
+        flex-direction: column;
+        padding: 0 24px 32px 24px;
+    }
+
+    .sidebar {
+        width: 100%;
+        order: 1;
+    }
+
+    .filters-box {
+        position: static;
+        padding: 20px;
+    }
+
+    .activities-list {
+        order: 2;
+        gap: 20px;
+    }
+
+    /* Make filters collapsible on mobile could be added here */
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 12px 16px;
+    }
+
+    .logo-saclay-meet {
+        width: 50px;
+        height: 50px;
+    }
+
+    .activities-content {
+        padding: 0 16px 24px 16px;
+    }
+
+    .filters-box {
+        padding: 16px;
+    }
+
+    .filters-title {
+        font-size: 20px;
+    }
+
+    .filter-category {
+        margin-bottom: 20px;
+    }
+
+    .activities-list {
+        gap: 16px;
+    }
+}

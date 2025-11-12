@@ -1,0 +1,363 @@
+.create-activity {
+    background-color: #ebb2b2;
+    min-height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-box {
+    background-color: #6E003C;
+    padding: 12px;
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.logo-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(110, 0, 60, 0.3);
+}
+
+.logo-saclay-meet {
+    transition: transform 120ms ease, filter 120ms ease;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 150px;
+}
+
+/* effet au clic (apparaît immédiatement au mousedown) */
+.logo-saclay-meet:active,
+.logo-saclay-meet:focus {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+    outline: none;
+}
+
+.logo-saclay-meet:focus-visible {
+    box-shadow: 0 0 0 3px rgba(110,0,60,0.18);
+}
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    padding: 32px;
+    flex: 1;
+}
+
+.content-wrapper {
+    display: flex;
+    gap: 48px;
+    background-color: #ffffff;
+    padding: 48px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-flow: row wrap;
+    transition: box-shadow 0.3s ease;
+}
+
+.content-wrapper:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.image-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.image-placeholder {
+    width: 350px;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.image-placeholder:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+.form-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-section {
+    max-width: 420px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.tags-container {
+    width: 260px;
+    background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+}
+
+.tags-title {
+    font-family: "Roboto", sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    margin-top: 0;
+    color: #2c2c2c;
+    letter-spacing: -0.5px;
+}
+
+.filter-category {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-category .MuiFormControlLabel-root {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    background-color: white;
+}
+
+.filter-category .MuiFormControlLabel-root:hover {
+    background-color: #f5f5f5;
+    transform: translateX(4px);
+}
+
+.filter-category .MuiFormControlLabel-root .MuiCheckbox-root {
+    padding: 8px;
+}
+
+.filter-category .MuiFormControlLabel-root .MuiTypography-root {
+    font-family: "Roboto", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #444;
+}
+
+.filter-category .MuiFormControlLabel-root .Mui-checked ~ .MuiTypography-root {
+    font-weight: 600;
+    color: #6E003C;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 48px;
+    padding-top: 16px;
+}
+
+.create-button {
+    text-transform: none;
+    font-size: 18px;
+    padding: 14px 48px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(110, 0, 60, 0.2);
+    transition: all 0.3s ease;
+}
+
+.create-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(110, 0, 60, 0.3);
+}
+
+.upload-button {
+    margin-top: 8px;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.upload-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(110, 0, 60, 0.25);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .content-wrapper {
+        gap: 32px;
+        padding: 32px;
+    }
+
+    .form-section {
+        max-width: 360px;
+    }
+
+    .tags-container {
+        width: 220px;
+    }
+}
+
+@media (max-width: 968px) {
+    .content-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tags-container {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .filter-category {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+
+    .content-wrapper {
+        padding: 24px 16px;
+        gap: 24px;
+    }
+
+    .image-placeholder {
+        width: 280px;
+        height: 280px;
+    }
+
+    .form-section {
+        max-width: 100%;
+    }
+
+    .tags-container {
+        max-width: 100%;
+    }
+
+    .filter-category {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 12px;
+    }
+
+    .logo-box {
+        padding: 8px;
+    }
+
+    .logo-saclay-meet {
+        max-width: 120px;
+    }
+
+    .content-wrapper {
+        padding: 20px 12px;
+        border-radius: 12px;
+    }
+
+    .image-placeholder {
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+        aspect-ratio: 1;
+    }
+
+    .tags-title {
+        font-size: 18px;
+    }
+
+    .tags-container {
+        padding: 16px;
+    }
+
+    .create-button {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
+/* Mode sombre (optionnel) */
+@media (prefers-color-scheme: dark) {
+    .create-activity {
+        background: linear-gradient(135deg, #2c1f1f 0%, #3d2828 100%);
+    }
+
+    .header {
+        background: rgba(40, 40, 40, 0.95);
+    }
+
+    .content-wrapper {
+        background-color: #2d2d2d;
+    }
+
+    .tags-container {
+        background: linear-gradient(135deg, #353535 0%, #2d2d2d 100%);
+    }
+
+    .tags-title {
+        color: #f0f0f0;
+    }
+
+    .filter-category .MuiFormControlLabel-root {
+        background-color: #3d3d3d;
+    }
+
+    .filter-category .MuiFormControlLabel-root:hover {
+        background-color: #454545;
+    }
+
+    .filter-category .MuiFormControlLabel-root .MuiTypography-root {
+        color: #e0e0e0;
+    }
+
+    .filter-category .MuiFormControlLabel-root .Mui-checked ~ .MuiTypography-root {
+        color: #ff8fa3;
+    }
+}
+
+/* Accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
