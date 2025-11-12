@@ -65,7 +65,7 @@ const ActivitiesCreated = () => {
             path1="/userProfile" 
             path2="/viewActivities" 
             path3="/createActivity" 
-            current="second"
+            current="first"
             inline={true}
           />
         </div>
@@ -113,6 +113,8 @@ const ActivitiesCreated = () => {
                   image={activity.imageUrl}            
                   title={title}
                   description={activity.description}
+                  startTime={activity.startTime}
+                  endTime={activity.endTime}
                   tags={Array.isArray(activity.tags) ? activity.tags : []}
                   onClick={() => navigate(`/activity/${activity.id}`)}
                 />

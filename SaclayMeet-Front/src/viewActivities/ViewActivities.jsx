@@ -185,6 +185,8 @@ const ViewActivities = () => {
                 image={activity.imageUrl}              
                 title={activity.title}
                 description={activity.description}
+                startTime={activity.startTime}
+                endTime={activity.endTime}
                 tags={Array.isArray(activity.tags) ? activity.tags : []}
                 onClick={() => navigate(`/activity/${activity.id}`)}
               />

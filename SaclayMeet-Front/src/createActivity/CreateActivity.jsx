@@ -82,13 +82,13 @@ const downscaleImageDataUrl = (dataUrl, mime, maxDim = MAX_DIM, jpegQuality = 0.
 const CreateActivity = () => {
   const navigate = useNavigate();
 
-  const [title, setTitle] = useState("Tutoring help");
-  const [location, setLocation] = useState("Bat 620");
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
   const [date, setDate] = useState(null);
   const [startTimeStr, setStartTimeStr] = useState("16:00");
   const [endTimeStr, setEndTimeStr] = useState("18:00");
   const [capacity, setCapacity] = useState("");
-  const [description, setDescription] = useState("Please help with tutoring !");
+  const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
 
   const [imagePreview, setImagePreview] = useState(placeholder);

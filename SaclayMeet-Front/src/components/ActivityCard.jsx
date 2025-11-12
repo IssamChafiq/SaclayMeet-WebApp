@@ -19,14 +19,27 @@ const normalizeImageSrc = (image) => {
   return s;
 };
 
+function formatDateTime(dt) {
+  if (!dt) return "";
+  const d = new Date(dt);
+  const day = d.toLocaleDateString();
+  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return `${day} • ${time}`;
+}
+
 const ActivityCard = ({
   image,
   title = "Title",
   description = "",
+  startTime,
+  endTime,
   tags = [],
   onClick,
 }) => {
   const imgSrc = normalizeImageSrc(image);
+  const dateLine = [formatDateTime(startTime), endTime ? `→ ${formatDateTime(endTime)}` : ""]
+    .filter(Boolean)
+    .join(" ");
 
   const tagList = Array.isArray(tags)
     ? tags.map((t) => (t == null ? "" : String(t)))
@@ -58,6 +71,7 @@ const ActivityCard = ({
       />
       <div className="activity-content">
         <h2 className="activity-title">{title || "Untitled"}</h2>
+        <p className="activity-date">{dateLine}</p>
         <p
           className="activity-description"
           title={description || ""}

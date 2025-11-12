@@ -73,7 +73,7 @@ const UpcomingActivities = () => {
             path1="/userProfile" 
             path2="/viewActivities" 
             path3="/createActivity" 
-            current="second"
+            current="first"
             inline={true}
           />
         </div>
@@ -124,6 +124,8 @@ const UpcomingActivities = () => {
                   image={activity.imageUrl}          
                   title={title}
                   description={description}
+                  startTime={activity.startTime}
+                  endTime={activity.endTime}
                   tags={tags}
                   onClick={() => navigate(`/activity/${activity.id}`)}
                 />

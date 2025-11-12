@@ -29,6 +29,13 @@
     color: #000000;
 }
 
+.activity-date {
+    font-family: "Roboto-Regular", Helvetica;
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    color: #333333;
+}
+
 .activity-description {
     font-family: "Roboto-Regular", Helvetica;
     font-size: 14px;
